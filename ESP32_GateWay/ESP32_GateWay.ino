@@ -29,7 +29,7 @@ extern "C" {
 #endif
 
 //Hard-coded parameters
-const char* nodeId = "192.168.43.196";
+const char* nodeId = "192.168.43.0";
 const char* ssid_hard = "test";
 const char* password_hard =  "aze123456";
 const char* mqtt_server = "192.168.43.196";
@@ -46,9 +46,11 @@ bool ledStatus = true;
 WiFiClient espClient;
 PubSubClient client(espClient);
 
+
+
 void setup() { //Setup - 10s
 
-  //Set up the LED pin - TBM into RGB
+  //Set up the LED pin
   pinMode (ledPin, OUTPUT);  
   digitalWrite (ledPin, ledStatus);
   
@@ -75,21 +77,16 @@ void setup() { //Setup - 10s
 
 void loop() {
 
-  //Checking Wifi
   if(WiFi.status() != WL_CONNECTED) {
     connect_wifi();}
 
-  //Checking MQTT
   if(!client.connected()){
     connect_MQTT();}
-
-  //Looks for MQTT messages to read (params to update)
-  client.loop(); 
-
-  //Scan the beacons around
+  
+  client.loop(); //Looks for MQTT messages to read (params to update)
+  
   ScanBeacons();
 
-  //Send an MQTT
   send_MQTT();
   
   //HTTP_post();

@@ -1,5 +1,3 @@
-//Function to fetch time - Used for proto dev but useless IRL
-
 void GetTime() {
   //Set NTP paramaters
   const char* ntpServer = "pool.ntp.org";
@@ -12,7 +10,6 @@ void GetTime() {
 
 void printLocalTime()
 {
-  //Prints the time in the terminal, main use is for IRL data collecting and prototyping
   struct tm timeinfo;
   if (!getLocalTime(&timeinfo)) {
     Serial.println("Failed to obtain time");

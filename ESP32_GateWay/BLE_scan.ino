@@ -1,5 +1,5 @@
-int beaconScanTime = 3; //Scan time must be longer than beacon interval
-uint8_t nb_detected = 0; //nb of beacons detected
+int beaconScanTime = 5; //Scan time must be longer than beacon interval
+uint8_t nb_detected = 0; //nb of beacons detected that are in the whitelist
 
 // We collect each device caracteristics and store them in BeaconData
 typedef struct {
@@ -40,7 +40,6 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
         buffer[bufferIndex].txPower = advertisedDevice.getTXPower();
       }
 
-      //Debug Print
       /*Serial.printf("name: %s \n", advertisedDevice.getName().c_str());
         Serial.printf("MAC: %s \n", advertisedDevice.getAddress().toString().c_str());
         Serial.printf("Manufactuerer Data: %d \n", advertisedDevice.getManufacturerData());
@@ -53,21 +52,19 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
 void ScanBeacons() {
   
   BLEScan* pBLEScan = BLEDevice::getScan(); //create new scan
-  MyAdvertisedDeviceCallbacks cb; //define callback
+  MyAdvertisedDeviceCallbacks cb;
   pBLEScan->setAdvertisedDeviceCallbacks(&cb);
   pBLEScan->setActiveScan(true); //active scan uses more power, but get results faster
   BLEScanResults foundDevices = pBLEScan->start(beaconScanTime);
   BLEDevice::getScan()->stop(); // Stop BLE
 
-  //Deprecated but kept for dev
   char whiteList[3][18] = // 10 is the length of the longest string + 1 ( for the '\0' at the end ) DEPRECATED
   {
     "e2:30:d3:c9:fb:66",
     "cf:18:14:5d:8a:04",
     "e2:51:e0:31:ee:0e",
   };
-
-  //checking whitelist
+  
   nb_detected = 0;
   for (uint8_t i = 0; i <= bufferIndex; i++) {
     for (uint8_t j = 0; j <= sizeof(whiteList) / 18 ; j++) {
@@ -80,8 +77,6 @@ void ScanBeacons() {
       }
     }
   }
-
-  //Prints to show in Serial 
   Serial.print("\n\n");
   printLocalTime();
   Serial.print("B-IoT devices found: ");
