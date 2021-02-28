@@ -17,23 +17,29 @@ const char* hardPassword =  "aze123456";
 //MQTT Parameters
 const char* mqttServer = "mqtt.b-iot.app";
 const int mqttPort = 1883;
-const char* mqttUser = "test";
-const char* mqttPassword = "test";
-const char* relayID = "test";
+const char* mqttUser = "test4";
+const char* mqttPassword = "test4";
+const char* relayID = "relay_4";
 
 //Wi-Fi parameters from MQTT
+int mqttFloor = 0;
 float mqttLatitude = 0;
 float mqttLongitude = 0;
 char* mqttSSID;
 const char* mqttPasswordWIFI;
 
 //Led parameters
-const int ledPin = 5;
+const int ledPin = 23;
 bool ledStatus = true;
 
+//scan parameters
+int beaconScanTime = 3; //Scan time must be longer than beacon interval
+uint8_t nb_detected = 0; //nb of beacons detected
+
+
 //Client name for the MQTT
-WiFiClient espClient;
-PubSubClient client(espClient);
+WiFiClient espclient;
+PubSubClient client(espclient);
 
 void setup() { //Setup - 10s
 
@@ -79,5 +85,7 @@ void loop() {
   ScanBeacons();
 
   //Send an MQTT
-  send_MQTT();
+  if (nb_detected >0 ){
+    send_MQTT();
+  }
 }

@@ -6,7 +6,7 @@ void connect_MQTT() {
   Serial.println("Checking MQTT ...");
   while (!client.connected()) {
     // Attempt to connect
-    Serial.print("Connecting to");
+    Serial.print("Connecting to ");
     Serial.println(mqttServer);
     if (client.connect(relayID, mqttUser, mqttPassword)) {
       // Subscribe to channel
@@ -15,7 +15,7 @@ void connect_MQTT() {
     } else {
       //if cannot connect
       Serial.print(" errorCode= ");
-      Serial.print(client.state());
+      Serial.println(client.state());
       // Wait 5 seconds before retrying
       delay(2500);
     }
@@ -52,6 +52,7 @@ void callback(char* topic, byte* message, unsigned int length) {
   }
 
   //Updating the parameters
+  mqttFloor = doc["floor"];
   mqttLatitude = doc["latitude"];
   mqttLongitude = doc["longitude"];
   mqttSSID = strdup(doc["wifi"]["ssid"]);
@@ -89,13 +90,13 @@ void send_MQTT() {
   
   doc["latitude"] = mqttLatitude; //title of the Json head is the relayID
   doc["longitude"] = mqttLongitude; //title of the Json head is the relayID
+  doc["floor"] = mqttFloor;
 
   //Sending the Json
   char buffer[256];
   serializeJson(doc, buffer);
   client.publish("incoming.update", buffer);
-  Serial.print("Sent Json on incoming.update: ");
-  Serial.println(buffer);
+  Serial.print("Sent Json on incoming.update");
   Serial.println("\n---------------------");
 
 }

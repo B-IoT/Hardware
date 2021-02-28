@@ -1,5 +1,3 @@
-int beaconScanTime = 3; //Scan time must be longer than beacon interval
-uint8_t nb_detected = 0; //nb of beacons detected
 
 // We collect each device caracteristics and store them in BeaconData
 typedef struct {
@@ -100,6 +98,6 @@ void ScanBeacons() {
   }
   bufferIndex = 0;
   delay(500);
-  Serial.println("\nScan done!\n\n");
+  Serial.println("\nScan done!\n");
   delay(500);
 }
