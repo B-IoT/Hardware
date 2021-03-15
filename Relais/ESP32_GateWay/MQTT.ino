@@ -8,16 +8,20 @@ void connect_MQTT() {
     // Attempt to connect
     Serial.print("Connecting to ");
     Serial.println(mqttServer);
+    ledBlueOn();
+    delay(500);    
     if (client.connect(relayID, mqttUser, mqttPassword)) {
       // Subscribe to channel
       Serial.print("update.parameters state : ");
       Serial.println(client.subscribe("update.parameters"));
+      ledBlueOn();
     } else {
       //if cannot connect
       Serial.print(" errorCode= ");
       Serial.println(client.state());
       // Wait 5 seconds before retrying
-      delay(2500);
+      ledTurquoiseOn();
+      delay(500);    
     }
   }
 

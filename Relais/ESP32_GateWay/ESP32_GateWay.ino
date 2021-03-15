@@ -15,7 +15,7 @@ const char* hardSSID = "test";
 const char* hardPassword =  "aze123456";
 
 //MQTT Parameters
-const char* mqttServer = "mqtt.b-iot.app";
+const char* mqttServer = "mqtt.b-iot.ch";
 const int mqttPort = 1883;
 const char* mqttUser = "test4";
 const char* mqttPassword = "test4";
@@ -29,8 +29,17 @@ char* mqttSSID;
 const char* mqttPasswordWIFI;
 
 //Led parameters
-const int ledPin = 23;
-bool ledStatus = true;
+const int ledGreen = 22;
+const int ledBlue = 23;
+const int ledRed = 3;
+const int ledPlus = 1;
+
+const int freq = 5000;
+const int ledChannelGreen = 0;
+const int ledChannelBlue = 1;
+const int resolution = 12;
+const int intensiteOn = 3850;
+const int intensiteOff = 4095;
 
 //scan parameters
 int beaconScanTime = 3; //Scan time must be longer than beacon interval
@@ -44,34 +53,48 @@ PubSubClient client(espclient);
 void setup() { //Setup - 10s
 
   //Set up the LED pin - TBM into RGB
-  pinMode (ledPin, OUTPUT);  
-  digitalWrite (ledPin, ledStatus);
+  pinMode (ledGreen, OUTPUT);
+  pinMode (ledPlus, OUTPUT);
+  pinMode (ledRed, OUTPUT);
+  pinMode (ledBlue, OUTPUT);  
+  digitalWrite (ledGreen, HIGH);  // turn off the LED
+  digitalWrite (ledRed, HIGH);  // turn off the LED
+  digitalWrite (ledBlue, HIGH);  // turn off the LED 
+  digitalWrite (ledPlus, HIGH);  // turn off the LED
+  
+  ledcSetup(ledChannelGreen, freq, resolution);
+  ledcSetup(ledChannelBlue, freq, resolution);
+  
+  ledcAttachPin(ledGreen, ledChannelGreen);
+  ledcAttachPin(ledBlue, ledChannelBlue);
+  
+  ledGreenOn();
   
   //Begin Serial
   Serial.begin(115200);
-  delay(2000);  
+  delay(250);  
 
   //Begin Wifi
   WiFi.begin(hardSSID, hardPassword);
-  delay(2000);
+  delay(250);
 
   //Synchronise time
   GetTime();
-  delay(2000);
+  delay(250);
 
   //Begin bluetooth  
   BLEDevice::init("");
-  delay(2000);
+  delay(250);
 
   //Begin MQTT
   client.setServer(mqttServer, mqttPort);
-  client.setCallback(callback);    
+  client.setCallback(callback);   
 }
 
 
 void loop() {
 
-  //Checking Wifi
+   //Checking Wifi
   if(WiFi.status() != WL_CONNECTED) {
     connect_wifi();}
 
@@ -88,4 +111,5 @@ void loop() {
   if (nb_detected >0 ){
     send_MQTT();
   }
+  
 }
