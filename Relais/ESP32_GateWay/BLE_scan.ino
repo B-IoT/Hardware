@@ -7,7 +7,7 @@ typedef struct {
   int txPower;
 } BeaconData;
 
-uint8_t bufferIndex = 0;  // Found devices counter
+uint8_t nb_detected = 0;  // Found devices counter
 BeaconData buffer[50];    // Buffer to store found device data
 
 class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
@@ -58,6 +58,7 @@ void ScanBeacons() {
   BLEDevice::getScan()->stop(); // Stop BLE
 
   //Deprecated but kept for dev
+  /*
   char whiteList[3][18] = // 10 is the length of the longest string + 1 ( for the '\0' at the end ) DEPRECATED
   {
     "e2:30:d3:c9:fb:66",
@@ -67,7 +68,7 @@ void ScanBeacons() {
 
   //checking whitelist
   nb_detected = 0;
-  for (uint8_t i = 0; i <= bufferIndex; i++) {
+  for (uint8_t i = 0; i <= nb_detected; i++) {
     for (uint8_t j = 0; j <= sizeof(whiteList) / 18 ; j++) {
       if (strcmp(buffer[i].address, whiteList[j]) == 0) {
         strcpy(buffer[nb_detected].id, buffer[i].id);
@@ -77,13 +78,13 @@ void ScanBeacons() {
         nb_detected++;
       }
     }
-  }
+  }*/
 
   //Prints to show in Serial 
   Serial.print("\n\n");
   printLocalTime();
   Serial.print("B-IoT devices found: ");
-  Serial.println(nb_detected);
+  Serial.println(bufferIndex);
   for (uint8_t i=0; i < nb_detected; i++) {
     
     Serial.print("Name: ");

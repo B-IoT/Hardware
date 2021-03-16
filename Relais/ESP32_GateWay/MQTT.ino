@@ -82,13 +82,13 @@ void send_MQTT() {
 
   //First array is the RSSI of all devices Json/relayID/rssi
   JsonArray rssi = doc.createNestedArray("rssi");
-  for (uint8_t i = 0; i < nb_detected; i++) {
+  for (uint8_t i = 0; i < bufferIndex; i++) {
     rssi.add(buffer[i].rssi);
   }
 
   //Second array is the mac of all devices Json/relayID/mac
   JsonArray mac = doc.createNestedArray("mac");
-  for (uint8_t i = 0; i < nb_detected; i++) {
+  for (uint8_t i = 0; i < bufferIndex; i++) {
     mac.add(buffer[i].address);
   }
   
