@@ -7,7 +7,7 @@ typedef struct {
   int txPower;
 } BeaconData;
 
-uint8_t nb_detected = 0;  // Found devices counter
+uint8_t bufferIndex = 0;  // Found devices counter
 BeaconData buffer[50];    // Buffer to store found device data
 
 class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
