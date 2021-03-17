@@ -4,7 +4,7 @@ void connect_wifi() {
   
   while (WiFi.status() != WL_CONNECTED) { //Keeps trying to connect until it's ok
     
-    Serial.print(".");
+    Serial.println(".");
     WiFi.begin(mqttSSID, mqttPasswordWIFI); //tries to connect with the MQTT received credentials
     ledTurquoiseOn(); //Led turquoise
     delay(500); // wait 500ms

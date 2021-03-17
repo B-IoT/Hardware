@@ -11,15 +11,15 @@
 #include <BLEAdvertisedDevice.h>
 
 //WiFI parameters
-const char* hardSSID = "test";
-const char* hardPassword =  "aze123456";
+const char* hardSSID = "IT_ELS";
+const char* hardPassword =  "BLIs0urce19";
 
 //MQTT Parameters
 const char* mqttServer = "mqtt.b-iot.ch";
 const int mqttPort = 1883;
-const char* mqttUser = "test4";
-const char* mqttPassword = "test4";
-const char* relayID = "relay_4";
+const char* mqttUser = "test20";
+const char* mqttPassword = "test20";
+const char* relayID = "relay_20";
 
 //Wi-Fi parameters from MQTT
 int mqttFloor = 0;
@@ -108,8 +108,7 @@ void loop() {
   ScanBeacons();
 
   //Send an MQTT
-  if (nb_detected >0 ){
+  if (nb_detected > 0){
     send_MQTT();
   }
-  
 }
