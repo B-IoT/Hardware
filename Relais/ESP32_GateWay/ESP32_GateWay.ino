@@ -17,9 +17,9 @@ const char* hardPassword =  "BLIs0urce19";
 //MQTT Parameters
 const char* mqttServer = "mqtt.b-iot.ch";
 const int mqttPort = 1883;
-const char* mqttUser = "test20";
-const char* mqttPassword = "test20";
-const char* relayID = "relay_20";
+const char* mqttUser = "test17";
+const char* mqttPassword = "test17";
+const char* relayID = "relay_17";
 
 //Wi-Fi parameters from MQTT
 int mqttFloor = 0;
@@ -37,7 +37,7 @@ const int ledPlus = 1;
 const int freq = 5000;
 const int ledChannelGreen = 0;
 const int ledChannelBlue = 1;
-const int resolution = 12;
+const int resolution = 12; 
 const int intensiteOn = 3850;
 const int intensiteOff = 4095;
 

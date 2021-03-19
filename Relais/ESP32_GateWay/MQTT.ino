@@ -1,4 +1,3 @@
-//Json dans lequel on va stocker toutes les données reçues
 DynamicJsonDocument doc(2048);
 
 void connect_MQTT() {
@@ -77,7 +76,7 @@ void callback(char* topic, byte* message, unsigned int length) {
 void send_MQTT() {
 
   //Creating the Json document to send
-  StaticJsonDocument<200> doc;                                                                                           //TO INCREASE
+  StaticJsonDocument<750> doc;                                                                                           //TO INCREASE
   doc["relayID"] = relayID; //title of the Json head is the relayID
 
   //First array is the RSSI of all devices Json/relayID/rssi
@@ -97,7 +96,7 @@ void send_MQTT() {
   doc["floor"] = mqttFloor;
 
   //Sending the Json
-  char buffer[256];
+  char buffer[250];
   serializeJson(doc, buffer);
   client.publish("incoming.update", buffer);
   Serial.println(buffer);
