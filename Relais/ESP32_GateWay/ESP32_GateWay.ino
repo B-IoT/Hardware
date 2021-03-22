@@ -57,6 +57,7 @@ void setup() { //Setup - 10s
   pinMode (ledPlus, OUTPUT);
   pinMode (ledRed, OUTPUT);
   pinMode (ledBlue, OUTPUT);  
+  
   digitalWrite (ledGreen, HIGH);  // turn off the LED
   digitalWrite (ledRed, HIGH);  // turn off the LED
   digitalWrite (ledBlue, HIGH);  // turn off the LED 
@@ -96,19 +97,20 @@ void loop() {
 
    //Checking Wifi
   if(WiFi.status() != WL_CONNECTED) {
-    connect_wifi();}
+    connect_wifi();
+}
 
-  //Checking MQTT
-  if(!client.connected()){
-    connect_MQTT();}
-
+  //Checking MQTT if Wifi connected
+  if(WiFi.status() == WL_CONNECTED && !client.connected()){
+    connect_MQTT(); 
+  }
   //Looks for MQTT messages to read (params to update)
   client.loop();
   //Scan the beacons around
   ScanBeacons();
 
-  //Send an MQTT
-  if (nb_detected > 0){
+  //Send an MQTT after the first update
+  if (nb_detected > 0 && mqttLatitude!=0 && mqttLongitude!=0){
     send_MQTT();
   }
 }

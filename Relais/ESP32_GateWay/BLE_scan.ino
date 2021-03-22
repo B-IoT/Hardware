@@ -56,12 +56,15 @@ void ScanBeacons() {
   BLEScanResults foundDevices = pBLEScan->start(beaconScanTime);
   BLEDevice::getScan()->stop(); // Stop BLE
 
+
   //Deprecated but kept for dev
-  char whiteList[3][18] = // 10 is the length of the longest string + 1 ( for the '\0' at the end ) DEPRECATED
+  char whiteList[2][18] = // 10 is the length of the longest string + 1 ( for the '\0' at the end ) DEPRECATED
   {
-    "e3:ba:d7:b6:e3:07",
-    "e2:30:d3:c9:fb:66",
-    "e3:ba:d7:b6:e3:07",
+//    "e3:ba:d7:b6:e3:07",
+//    "e2:30:d3:c9:fb:66",
+//    "e3:ba:d7:b6:e3:07",
+    "cf:18:14:5d:8a:04",
+    "e2:51:e0:31:ee:0e",
   };
 
   //checking whitelist
