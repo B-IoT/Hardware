@@ -4,17 +4,17 @@ void connect_MQTT() {
 
   Serial.println("Checking MQTT ...");
   while (!client.connected()) {
-    //if wifi deconnects after the first check
-   if(WiFi.status() != WL_CONNECTED) {
-      Serial.println("Wifi exit ...");
-      break;
-    }
-    else{
+//    //if wifi deconnects after the first check
+//   if(WiFi.status() != WL_CONNECTED) {
+//      Serial.println("Wifi exit ...");
+//      break;
+//    }
+//    else{
         // Attempt to connect
         Serial.print("Connecting to ");
         Serial.println(mqttServer);
         ledBlueOn();
-        digitalWrite(ledYellowTest,HIGH);
+        
         delay(500);    
         if (client.connect(relayID, mqttUser, mqttPassword)) {
           // Subscribe to channel
@@ -29,7 +29,7 @@ void connect_MQTT() {
           ledTurquoiseOn();
           delay(500);    
         }
-     }
+     //}
   }
 
   Serial.println(" Connected! - Subscribed to each channels");

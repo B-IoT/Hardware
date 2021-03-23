@@ -9,10 +9,10 @@
 #include <BLEUtils.h>
 #include <BLEScan.h>
 #include <BLEAdvertisedDevice.h>
-
+#include <BLEBeacon.h>
 //WiFI parameters
-const char* hardSSID = "IT_ELS";
-const char* hardPassword =  "BLIs0urce19";
+const char* hardSSID = "Sarahb";
+const char* hardPassword =  "biot567578";
 
 //MQTT Parameters
 const char* mqttServer = "mqtt.b-iot.ch";
@@ -44,6 +44,8 @@ const int intensiteOff = 4095;
 //scan parameters
 int beaconScanTime = 3; //Scan time must be longer than beacon interval
 uint8_t nb_detected = 0; //nb of beacons detected
+
+//Function to fetch time - Used for proto dev but useless IRL
 
 
 //Client name for the MQTT

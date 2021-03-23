@@ -2,6 +2,8 @@
 typedef struct {
   char id[25] ; //Device Name
   char address[18];   // 67:f1:d2:04:cd:5d
+//  BLEUUID beaconServiceUUID; 
+//  std::string strManufacturerData;
   int rssi;
   int txPower;
 } BeaconData;
@@ -36,6 +38,15 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
       if (advertisedDevice.haveTXPower()) {
         buffer[bufferIndex].txPower = advertisedDevice.getTXPower();
       }
+      //For dev beacons
+//      if(advertisedDevice.haveServiceUUID())
+//      {
+//        buffer[bufferIndex].beaconServiceUUID = advertisedDevice.getServiceUUID();
+//      }
+//      if(advertisedDevice.haveManufacturerData() == true)
+//      {
+//        buffer[bufferIndex].strManufacturerData = advertisedDevice.getManufacturerData();
+//      }
 
       //Debug Print
       /*Serial.printf("name: %s \n", advertisedDevice.getName().c_str());
@@ -76,6 +87,8 @@ void ScanBeacons() {
         strcpy(buffer[nb_detected].address, buffer[i].address);
         buffer[nb_detected].rssi = buffer[i].rssi;
         buffer[nb_detected].txPower = buffer[i].txPower;
+//        buffer[nb_detected].beaconServiceUUID = buffer[i].beaconServiceUUID;
+//        buffer[nb_detected].strManufacturerData = buffer[i].strManufacturerData;
         nb_detected++;
       }
     }
@@ -96,6 +109,18 @@ void ScanBeacons() {
     Serial.println(buffer[i].rssi);
     Serial.print("TX Power: ");
     Serial.println(buffer[i].txPower);
+    //For dev beacons
+//    Serial.print("Service UUID: ");
+//    Serial.println(buffer[i].beaconServiceUUID.toString().c_str());
+//    std::string manufacturedData = buffer[i].strManufacturerData;
+//    uint8_t cManufacturerData[100];
+//    manufacturedData.copy((char *)cManufacturerData, manufacturedData.length(), 0);
+//    Serial.printf("strManufacturerData: %d ", manufacturedData.length());
+//    for (int j = 0; j < manufacturedData.length(); j++)
+//    {
+//      Serial.printf("[%X]", cManufacturerData[j]);
+//    }
+//    Serial.printf("\n");
     Serial.println("---------------------");
   }
   bufferIndex = 0;
