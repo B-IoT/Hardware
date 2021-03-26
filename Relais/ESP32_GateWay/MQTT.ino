@@ -4,24 +4,32 @@ void connect_MQTT() {
 
   Serial.println("Checking MQTT ...");
   while (!client.connected()) {
-    // Attempt to connect
-    Serial.print("Connecting to ");
-    Serial.println(mqttServer);
-    ledBlueOn();
-    delay(500);    
-    if (client.connect(relayID, mqttUser, mqttPassword)) {
-      // Subscribe to channel
-      Serial.print("update.parameters state : ");
-      Serial.println(client.subscribe("update.parameters"));
-      ledBlueOn();
-    } else {
-      //if cannot connect
-      Serial.print(" errorCode= ");
-      Serial.println(client.state());
-      // Wait 5 seconds before retrying
-      ledTurquoiseOn();
-      delay(500);    
-    }
+//    //if wifi deconnects after the first check
+//   if(WiFi.status() != WL_CONNECTED) {
+//      Serial.println("Wifi exit ...");
+//      break;
+//    }
+//    else{
+        // Attempt to connect
+        Serial.print("Connecting to ");
+        Serial.println(mqttServer);
+        ledBlueOn();
+        
+        delay(500);    
+        if (client.connect(relayID, mqttUser, mqttPassword)) {
+          // Subscribe to channel
+          Serial.print("update.parameters state : ");
+          Serial.println(client.subscribe("update.parameters"));
+          ledBlueOn();
+        } else {
+          //if cannot connect
+          Serial.print(" errorCode= ");
+          Serial.println(client.state());
+          // Wait 5 seconds before retrying
+          ledTurquoiseOn();
+          delay(500);    
+        }
+     //}
   }
 
   Serial.println(" Connected! - Subscribed to each channels");
@@ -61,6 +69,7 @@ void callback(char* topic, byte* message, unsigned int length) {
   mqttSSID = strdup(doc["wifi"]["ssid"]);
   mqttPasswordWIFI = strdup(doc["wifi"]["password"]);
 
+
   //const char* mac = doc["beacon"]["mac"]; //deprecated
   //long txPower = doc["beacon"]["txPower"]; //deprecated
   //bool ledStatus = doc["ledStatus"];
@@ -91,12 +100,12 @@ void send_MQTT() {
     mac.add(buffer[i].address);
   }
   
-  doc["latitude"] = mqttLatitude; //title of the Json head is the relayID
-  doc["longitude"] = mqttLongitude; //title of the Json head is the relayID
+  doc["latitude"] = serialized(String(mqttLatitude,6)); //latitude of the Json
+  doc["longitude"] = serialized(String(mqttLongitude,6)); //longitude of the Json
   doc["floor"] = mqttFloor;
 
   //Sending the Json
-  char buffer[250];
+  char buffer[400];
   serializeJson(doc, buffer);
   client.publish("incoming.update", buffer);
   Serial.println(buffer);

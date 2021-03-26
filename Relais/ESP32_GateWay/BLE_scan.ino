@@ -71,11 +71,11 @@ void ScanBeacons() {
   //Deprecated but kept for dev
   char whiteList[5][18] = // 10 is the length of the longest string + 1 ( for the '\0' at the end ) DEPRECATED
   {
-    "f1:96:cd:ee:25:bd",
     "cf:ae:ce:64:a0:f6",
-    "e3:6f:28:36:5a:db",
     "d1:0b:14:b3:18:6a",
     "fc:02:a0:fa:33:19",
+    "e3:6f:28:36:5a:db",
+    "f1:96:cd:ee:25:bd",
   };
 
   //checking whitelist
