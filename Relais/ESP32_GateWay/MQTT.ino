@@ -4,32 +4,24 @@ void connect_MQTT() {
 
   Serial.println("Checking MQTT ...");
   while (!client.connected()) {
-//    //if wifi deconnects after the first check
-//   if(WiFi.status() != WL_CONNECTED) {
-//      Serial.println("Wifi exit ...");
-//      break;
-//    }
-//    else{
-        // Attempt to connect
-        Serial.print("Connecting to ");
-        Serial.println(mqttServer);
-        ledBlueOn();
-        
-        delay(500);    
-        if (client.connect(relayID, mqttUser, mqttPassword)) {
-          // Subscribe to channel
-          Serial.print("update.parameters state : ");
-          Serial.println(client.subscribe("update.parameters"));
-          ledBlueOn();
-        } else {
-          //if cannot connect
-          Serial.print(" errorCode= ");
-          Serial.println(client.state());
-          // Wait 5 seconds before retrying
-          ledTurquoiseOn();
-          delay(500);    
-        }
-     //}
+    // Attempt to connect
+    Serial.print("Connecting to ");
+    Serial.println(mqttServer);
+    ledBlueOn();
+    delay(500);    
+    if (client.connect(relayID, mqttUser, mqttPassword)) {
+      // Subscribe to channel
+      Serial.print("update.parameters state : ");
+      Serial.println(client.subscribe("update.parameters"));
+      ledBlueOn();
+    } else {
+      //if cannot connect
+      Serial.print(" errorCode= ");
+      Serial.println(client.state());
+      // Wait 5 seconds before retrying
+      ledTurquoiseOn();
+      delay(500);    
+    }
   }
 
   Serial.println(" Connected! - Subscribed to each channels");
@@ -68,7 +60,6 @@ void callback(char* topic, byte* message, unsigned int length) {
   mqttLongitude = doc["longitude"];
   mqttSSID = strdup(doc["wifi"]["ssid"]);
   mqttPasswordWIFI = strdup(doc["wifi"]["password"]);
-
 
   //const char* mac = doc["beacon"]["mac"]; //deprecated
   //long txPower = doc["beacon"]["txPower"]; //deprecated

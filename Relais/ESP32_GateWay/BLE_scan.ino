@@ -2,8 +2,8 @@
 typedef struct {
   char id[25] ; //Device Name
   char address[18];   // 67:f1:d2:04:cd:5d
-//  BLEUUID beaconServiceUUID; 
-//  std::string strManufacturerData;
+  //  BLEUUID beaconServiceUUID;
+  //  std::string strManufacturerData;
   int rssi;
   int txPower;
 } BeaconData;
@@ -39,14 +39,14 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
         buffer[bufferIndex].txPower = advertisedDevice.getTXPower();
       }
       //For dev beacons
-//      if(advertisedDevice.haveServiceUUID())
-//      {
-//        buffer[bufferIndex].beaconServiceUUID = advertisedDevice.getServiceUUID();
-//      }
-//      if(advertisedDevice.haveManufacturerData() == true)
-//      {
-//        buffer[bufferIndex].strManufacturerData = advertisedDevice.getManufacturerData();
-//      }
+      //      if(advertisedDevice.haveServiceUUID())
+      //      {
+      //        buffer[bufferIndex].beaconServiceUUID = advertisedDevice.getServiceUUID();
+      //      }
+      //      if(advertisedDevice.haveManufacturerData() == true)
+      //      {
+      //        buffer[bufferIndex].strManufacturerData = advertisedDevice.getManufacturerData();
+      //      }
 
       //Debug Print
       /*Serial.printf("name: %s \n", advertisedDevice.getName().c_str());
@@ -69,13 +69,13 @@ void ScanBeacons() {
 
 
   //Deprecated but kept for dev
-  char whiteList[2][18] = // 10 is the length of the longest string + 1 ( for the '\0' at the end ) DEPRECATED
+  char whiteList[5][18] = // 10 is the length of the longest string + 1 ( for the '\0' at the end ) DEPRECATED
   {
-//    "e3:ba:d7:b6:e3:07",
-//    "e2:30:d3:c9:fb:66",
-//    "e3:ba:d7:b6:e3:07",
-    "cf:18:14:5d:8a:04",
-    "e2:51:e0:31:ee:0e",
+    "f1:96:cd:ee:25:bd",
+    "cf:ae:ce:64:a0:f6",
+    "e3:6f:28:36:5a:db",
+    "d1:0b:14:b3:18:6a",
+    "fc:02:a0:fa:33:19",
   };
 
   //checking whitelist
@@ -87,8 +87,8 @@ void ScanBeacons() {
         strcpy(buffer[nb_detected].address, buffer[i].address);
         buffer[nb_detected].rssi = buffer[i].rssi;
         buffer[nb_detected].txPower = buffer[i].txPower;
-//        buffer[nb_detected].beaconServiceUUID = buffer[i].beaconServiceUUID;
-//        buffer[nb_detected].strManufacturerData = buffer[i].strManufacturerData;
+        //        buffer[nb_detected].beaconServiceUUID = buffer[i].beaconServiceUUID;
+        //        buffer[nb_detected].strManufacturerData = buffer[i].strManufacturerData;
         nb_detected++;
       }
     }
@@ -110,17 +110,17 @@ void ScanBeacons() {
     Serial.print("TX Power: ");
     Serial.println(buffer[i].txPower);
     //For dev beacons
-//    Serial.print("Service UUID: ");
-//    Serial.println(buffer[i].beaconServiceUUID.toString().c_str());
-//    std::string manufacturedData = buffer[i].strManufacturerData;
-//    uint8_t cManufacturerData[100];
-//    manufacturedData.copy((char *)cManufacturerData, manufacturedData.length(), 0);
-//    Serial.printf("strManufacturerData: %d ", manufacturedData.length());
-//    for (int j = 0; j < manufacturedData.length(); j++)
-//    {
-//      Serial.printf("[%X]", cManufacturerData[j]);
-//    }
-//    Serial.printf("\n");
+    //    Serial.print("Service UUID: ");
+    //    Serial.println(buffer[i].beaconServiceUUID.toString().c_str());
+    //    std::string manufacturedData = buffer[i].strManufacturerData;
+    //    uint8_t cManufacturerData[100];
+    //    manufacturedData.copy((char *)cManufacturerData, manufacturedData.length(), 0);
+    //    Serial.printf("strManufacturerData: %d ", manufacturedData.length());
+    //    for (int j = 0; j < manufacturedData.length(); j++)
+    //    {
+    //      Serial.printf("[%X]", cManufacturerData[j]);
+    //    }
+    //    Serial.printf("\n");
     Serial.println("---------------------");
   }
   bufferIndex = 0;
