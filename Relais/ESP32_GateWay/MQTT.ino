@@ -1,42 +1,52 @@
-DynamicJsonDocument doc(2048);
-
 void connect_MQTT() {
 
-  Serial.println("Checking MQTT ...");
-  while (!client.connected()) {
-//    //if wifi deconnects after the first check
-//   if(WiFi.status() != WL_CONNECTED) {
-//      Serial.println("Wifi exit ...");
-//      break;
-//    }
-//    else{
-        // Attempt to connect
-        Serial.print("Connecting to ");
-        Serial.println(mqttServer);
-        ledBlueOn();
-        
-        delay(500);    
-        if (client.connect(relayID, mqttUser, mqttPassword)) {
-          // Subscribe to channel
-          Serial.print("update.parameters state : ");
-          Serial.println(client.subscribe("update.parameters"));
-          ledBlueOn();
-        } else {
-          //if cannot connect
-          Serial.print(" errorCode= ");
-          Serial.println(client.state());
-          // Wait 5 seconds before retrying
-          ledTurquoiseOn();
-          delay(500);    
-        }
-     //}
-  }
+  //Creating the Json document to send
+  DynamicJsonDocument doc(500);
+  doc["company"] = "biot";
 
-  Serial.println(" Connected! - Subscribed to each channels");
+  //Sending the Json
+  char buffer[400];
+  serializeJson(doc, buffer);
+
+  Serial.print("Checking MQTT with company id: ");
+  Serial.print(buffer);
+
+  while (!client.connected()) {
+    //if wifi deconnects after the first check
+    if(WiFi.status() != WL_CONNECTED) {
+          Serial.println("Wifi exit ...");
+          break;
+        }
+
+    
+    // Attempt to connect
+    Serial.print("Connecting to ");
+    Serial.println(mqttServer);
+    ledBlueOn();
+
+    delay(500);
+    if (client.connect(relayID, mqttUser, mqttPassword, "will", 1, false, buffer)) {
+      // Subscribe to channel
+      Serial.print("update.parameters state : ");
+      Serial.println(client.subscribe("update.parameters"));
+     Serial.println(" Connected! - Subscribed to each channels");
+      ledBlueOn();
+    } else {
+      //if cannot connect
+      Serial.print(" errorCode= ");
+      Serial.println(client.state());
+      // Wait 5 seconds before retrying
+      ledTurquoiseOn();
+      delay(500);
+    }
+    //}
+  }
 }
 
 
 void callback(char* topic, byte* message, unsigned int length) {
+
+  DynamicJsonDocument doc(500);
 
   //Prints for dev
   Serial.println("\n---------------\n");
@@ -85,7 +95,7 @@ void callback(char* topic, byte* message, unsigned int length) {
 void send_MQTT() {
 
   //Creating the Json document to send
-  StaticJsonDocument<750> doc;                                                                                           //TO INCREASE
+  DynamicJsonDocument doc(500);                                                                                          //TO INCREASE
   doc["relayID"] = relayID; //title of the Json head is the relayID
 
   //First array is the RSSI of all devices Json/relayID/rssi
@@ -99,9 +109,9 @@ void send_MQTT() {
   for (uint8_t i = 0; i < nb_detected; i++) {
     mac.add(buffer[i].address);
   }
-  
-  doc["latitude"] = serialized(String(mqttLatitude,6)); //latitude of the Json
-  doc["longitude"] = serialized(String(mqttLongitude,6)); //longitude of the Json
+
+  doc["latitude"] = serialized(String(mqttLatitude, 6)); //latitude of the Json
+  doc["longitude"] = serialized(String(mqttLongitude, 6)); //longitude of the Json
   doc["floor"] = mqttFloor;
 
   //Sending the Json
