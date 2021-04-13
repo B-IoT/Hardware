@@ -7,7 +7,7 @@ void GetTime() {
   const int   daylightOffset_sec = 3600;
 
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-  
+
 }
 
 void printLocalTime()
@@ -18,5 +18,7 @@ void printLocalTime()
     Serial.println("Failed to obtain time");
     return;
   }
-  Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S\n");
+  else {
+    Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S\n");
+  }
 }
