@@ -1,3 +1,4 @@
+//DynamicJsonDocument doc(2048); // old version working
 void connect_MQTT() {
 
   //Creating the Json document to send
@@ -25,7 +26,8 @@ void connect_MQTT() {
     ledBlueOn();
 
     delay(500);
-    if (client.connect(relayID, mqttUser, mqttPassword, "will", 1, false, buffer)) {
+    if (client.connect(relayID, mqttUser, mqttPassword, "will", 1, false, buffer)) { //new version
+//    if (client.connect(relayID, mqttUser, mqttPassword)) { //old version working
       // Subscribe to channel
       Serial.print("update.parameters state : ");
       Serial.println(client.subscribe("update.parameters"));
@@ -95,7 +97,8 @@ void callback(char* topic, byte* message, unsigned int length) {
 void send_MQTT() {
 
   //Creating the Json document to send
-  DynamicJsonDocument doc(500);                                                                                          //TO INCREASE
+  DynamicJsonDocument doc(500);  //new version
+// StaticJsonDocument<750> doc;    //old version working                                                                                     //TO INCREASE
   doc["relayID"] = relayID; //title of the Json head is the relayID
 
   //First array is the RSSI of all devices Json/relayID/rssi
@@ -108,6 +111,24 @@ void send_MQTT() {
   JsonArray mac = doc.createNestedArray("mac");
   for (uint8_t i = 0; i < nb_detected; i++) {
     mac.add(buffer[i].address);
+  }
+
+    //Third array is the Battery Level of all devices Json/relayID/battery
+  JsonArray battery = doc.createNestedArray("battery");
+  for (uint8_t i = 0; i < nb_detected; i++) {
+    battery.add(buffer[i].batteryLevel);
+  }
+
+    //Fourth array is the temperature of all devices Json/relayID/temperature
+  JsonArray temperature = doc.createNestedArray("temperature");
+  for (uint8_t i = 0; i < nb_detected; i++) {
+    temperature.add(buffer[i].temperature);
+  }
+
+    //Fifth array is the state of all devices Json/relayID/state
+  JsonArray state = doc.createNestedArray("state");
+  for (uint8_t i = 0; i < nb_detected; i++) {
+    state.add(buffer[i].state);
   }
 
   doc["latitude"] = serialized(String(mqttLatitude, 6)); //latitude of the Json
