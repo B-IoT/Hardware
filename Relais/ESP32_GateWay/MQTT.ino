@@ -27,7 +27,7 @@ void connect_MQTT() {
 
     delay(500);
     if (client.connect(relayID, mqttUser, mqttPassword, "will", 1, false, buffer)) { //new version
-//    if (client.connect(relayID, mqttUser, mqttPassword)) { //old version working
+    //if (client.connect(relayID, mqttUser, mqttPassword)) { //old version working
       // Subscribe to channel
       Serial.print("update.parameters state : ");
       Serial.println(client.subscribe("update.parameters"));
@@ -98,7 +98,7 @@ void send_MQTT() {
 
   //Creating the Json document to send
   DynamicJsonDocument doc(500);  //new version
-// StaticJsonDocument<750> doc;    //old version working                                                                                     //TO INCREASE
+//StaticJsonDocument<750> doc;    //old version working                                                                                     //TO INCREASE
   doc["relayID"] = relayID; //title of the Json head is the relayID
 
   //First array is the RSSI of all devices Json/relayID/rssi
@@ -144,3 +144,14 @@ void send_MQTT() {
   Serial.println("\n---------------------");
 
 }
+ // To check data before sending JSon 
+//void sanityCheckJson()
+//{
+//    for (uint8_t i = 0; i < nb_detected; i++) {
+//      
+//      if(buffer[i].state !=NOTHING && strlen(buffer[i].adress) !=0)
+//      {
+//         sanityCheck = true;
+//      }
+//  }
+//}

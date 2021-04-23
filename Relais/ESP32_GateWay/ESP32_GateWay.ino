@@ -42,9 +42,9 @@ const int intensiteOn = 3850;
 const int intensiteOff = 4095;
 
 //scan parameters
-int beaconScanTime = 3; //Scan time must be longer than beacon interval
+int beaconScanTime = 4; //Scan time must be longer than beacon interval
 uint8_t nb_detected = 0; //nb of beacons detected
-
+bool sanityCheck = false;
 //Function to fetch time - Used for proto dev but useless IRL
 
 
