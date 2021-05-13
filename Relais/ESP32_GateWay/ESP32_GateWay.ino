@@ -10,6 +10,7 @@
 #include <BLEScan.h>
 #include <BLEAdvertisedDevice.h>
 #include <BLEBeacon.h>
+
 //WiFI parameters
 const char* hardSSID = "IT_ELS";
 const char* hardPassword = "BLIs0urce19";
@@ -17,9 +18,9 @@ const char* hardPassword = "BLIs0urce19";
 //MQTT Parameters
 const char* mqttServer = "mqtt.b-iot.ch";
 const int mqttPort = 1883;
-const char* mqttUser = "test22";
-const char* mqttPassword = "test22";
-const char* relayID = "relay_22";
+const char* mqttUser = "test12";
+const char* mqttPassword = "test12";
+const char* relayID = "relay_12";
 
 //Wi-Fi parameters from MQTT
 int mqttFloor = 0;
@@ -41,12 +42,10 @@ const int resolution = 12;
 const int intensiteOn = 3850;
 const int intensiteOff = 4095;
 
-//scan parameters
-int beaconScanTime = 4; //Scan time must be longer than beacon interval
-uint8_t nb_detected = 0; //nb of beacons detected
-bool sanityCheck = false;
-//Function to fetch time - Used for proto dev but useless IRL
-
+//Scan parameters
+int beaconScanTime = 3; //Scan time must be longer than beacon interval
+uint8_t nb_detected = 0; //Nb of beacons detected
+uint8_t maxBeaconToSend = 3; //Max nb of beacons to be sent at the same time to the MQTT
 
 //Client name for the MQTT
 WiFiClient espclient;
@@ -94,25 +93,26 @@ void setup() { //Setup - 10s
   client.setCallback(callback);   
 }
 
-
 void loop() {
 
    //Checking Wifi
   if(WiFi.status() != WL_CONNECTED) {
     connect_wifi();
-}
+  }
 
   //Checking MQTT if Wifi connected
-  if(WiFi.status() == WL_CONNECTED && !client.connected()){
+  if(WiFi.status() == WL_CONNECTED && !client.connected()) {
     connect_MQTT(); 
   }
+  
   //Looks for MQTT messages to read (params to update)
   client.loop();
 
   //Scan the beacons around
   ScanBeacons();
-  //Send an MQTT after the first update
-  if (nb_detected > 0 && mqttLatitude!=0 && mqttLongitude!=0){
+  
+  //Send to MQTT after the first update
+  if (nb_detected > 0 && mqttLatitude!=0 && mqttLongitude!=0) {
     send_MQTT();
   }
 }
