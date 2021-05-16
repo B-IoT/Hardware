@@ -4,13 +4,13 @@
 #include <PubSubClient.h>
 #include "time.h"
 
+
 //Bluetooth librairies
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEScan.h>
 #include <BLEAdvertisedDevice.h>
 #include <BLEBeacon.h>
-
 //WiFI parameters
 const char* hardSSID = "IT_ELS";
 const char* hardPassword = "BLIs0urce19";
@@ -18,11 +18,12 @@ const char* hardPassword = "BLIs0urce19";
 //MQTT Parameters
 const char* mqttServer = "mqtt.b-iot.ch";
 const int mqttPort = 1883;
-const char* mqttUser = "test12";
-const char* mqttPassword = "test12";
-const char* relayID = "relay_12";
+const char* mqttUser = "test8";
+const char* mqttPassword = "test8";
+const char* relayID = "relay_8";
 
 //Wi-Fi parameters from MQTT
+uint8_t maxBeaconToSend = 3; // Max nb of beacons to be sent at the same time to the MQTT
 int mqttFloor = 0;
 float mqttLatitude = 0;
 float mqttLongitude = 0;
@@ -42,10 +43,11 @@ const int resolution = 12;
 const int intensiteOn = 3850;
 const int intensiteOff = 4095;
 
-//Scan parameters
-int beaconScanTime = 3; //Scan time must be longer than beacon interval
-uint8_t nb_detected = 0; //Nb of beacons detected
-uint8_t maxBeaconToSend = 3; //Max nb of beacons to be sent at the same time to the MQTT
+//scan parameters
+int beaconScanTime = 1; //Scan time must be longer than beacon interval
+uint8_t packetScanTime = 4; //Time to get packet from beacons
+uint8_t nb_detected = 0; //Nb of beacon detected
+uint8_t beaconArray = 0; //Nb of beacon to send
 
 //Client name for the MQTT
 WiFiClient espclient;
@@ -93,26 +95,25 @@ void setup() { //Setup - 10s
   client.setCallback(callback);   
 }
 
+
 void loop() {
 
    //Checking Wifi
   if(WiFi.status() != WL_CONNECTED) {
     connect_wifi();
-  }
+}
 
   //Checking MQTT if Wifi connected
-  if(WiFi.status() == WL_CONNECTED && !client.connected()) {
+  if(WiFi.status() == WL_CONNECTED && !client.connected()){
     connect_MQTT(); 
   }
-  
   //Looks for MQTT messages to read (params to update)
   client.loop();
 
   //Scan the beacons around
   ScanBeacons();
-  
-  //Send to MQTT after the first update
-  if (nb_detected > 0 && mqttLatitude!=0 && mqttLongitude!=0) {
+  //Send an MQTT after the first update
+  if (beaconArray > 0 && mqttLatitude!=0 && mqttLongitude!=0){
     send_MQTT();
   }
 }
