@@ -4,7 +4,6 @@
 #include <PubSubClient.h>
 #include "time.h"
 
-
 //Bluetooth librairies
 #include <BLEDevice.h>
 #include <BLEUtils.h>
@@ -16,6 +15,7 @@ const char* hardSSID = "IT_ELS";
 const char* hardPassword = "BLIs0urce19";
 
 //MQTT Parameters
+uint8_t maxBeaconToSend = 3; // Max nb of beacons to be sent at the same time to the MQTT
 const char* mqttServer = "mqtt.b-iot.ch";
 const int mqttPort = 1883;
 const char* mqttUser = "test8";
@@ -23,7 +23,6 @@ const char* mqttPassword = "test8";
 const char* relayID = "relay_8";
 
 //Wi-Fi parameters from MQTT
-uint8_t maxBeaconToSend = 3; // Max nb of beacons to be sent at the same time to the MQTT
 int mqttFloor = 0;
 float mqttLatitude = 0;
 float mqttLongitude = 0;
@@ -44,10 +43,11 @@ const int intensiteOn = 3850;
 const int intensiteOff = 4095;
 
 //scan parameters
-int beaconScanTime = 1; //Scan time must be longer than beacon interval
-uint8_t packetScanTime = 4; //Time to get packet from beacons
-uint8_t nb_detected = 0; //Nb of beacon detected
-uint8_t beaconArray = 0; //Nb of beacon to send
+uint8_t packetScanTime = 4;
+uint8_t beaconScanTime = 1; // Scan time must be longer than beacon interval
+uint8_t nb_detected = 0; // Nb of beacon detected
+uint8_t beaconArray = 0; // Nb of beacon to send
+
 
 //Client name for the MQTT
 WiFiClient espclient;

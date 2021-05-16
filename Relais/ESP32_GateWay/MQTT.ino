@@ -15,9 +15,9 @@ void connect_MQTT() {
   while (!client.connected()) {
     //if wifi deconnects after the first check
     if(WiFi.status() != WL_CONNECTED) {
-          Serial.println("Wifi exit ...");
-          break;
-        }
+      Serial.println("Wifi exit ...");
+      break;
+    }
             
     // Attempt to connect
     Serial.print("Connecting to ");
@@ -135,30 +135,31 @@ void send_MQTT() {
       // Fill and send the JSON
       send_JSON(doc, 0, beaconArray);
     }
-
 }
+
 //Goal: Fill the doc and send the JSON doc to the mqtt
 //Parameters: doc: the Json document to fill
 //            idxStart: index to start the filling
 //            idxEnd: index to stop the filling
 void send_JSON(DynamicJsonDocument doc, uint8_t idxStart, uint8_t idxEnd) {
     
-  JsonArray beacons = doc.createNestedArray("beacons"); //Beacon array to send
+  JsonArray beacons = doc.createNestedArray("beacons"); // Beacon array to send
   
-  for (uint8_t i = 0; i < beaconArray; i++) {
-    DynamicJsonDocument beaconDoc(100); //Json size for on beacon = 78 (measured)
+  // Write Beacon data to send
+  for (uint8_t i = idxStart; i < idxEnd; i++) {
+    DynamicJsonDocument beaconDoc(100); // Json size for on beacon = 78 (measured)
     beaconDoc["mac"] = tabToSend[i].address;
     beaconDoc["rssi"] = tabToSend[i].rssi;
     beaconDoc["battery"] = tabToSend[i].batteryLevel;
     beaconDoc["temperature"] = tabToSend[i].temperature;
     beaconDoc["status"] = tabToSend[i].state;
     beacons.add(beaconDoc);
-  }  
+  }
     //To measure Json beacon size (for dev)
     /*size_t jsonSizebeacon =  measureJson(beaconDoc);//measure number of caracters inside the json serialized
     Serial.print("taille jsonbeacon= ");
     Serial.println(jsonSizebeacon);*/
-
+    
     doc["latitude"] = serialized(String(mqttLatitude, 6)); //latitude of the Json
     doc["longitude"] = serialized(String(mqttLongitude, 6)); //longitude of the Json
     doc["floor"] = mqttFloor;
