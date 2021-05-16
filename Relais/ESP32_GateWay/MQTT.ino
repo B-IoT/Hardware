@@ -82,8 +82,16 @@ void send_MQTT() {
   //Parse the JSON condition 
   if (nb_detected > maxBeaconToSend) {
     uint8_t startIdx = 0; // Index of the first beacon to send
-    uint8_t nbDocToCreate = nb_detected / maxBeaconToSend + 1; //Number of document required to send all beacons
-   
+    uint8_t nbDocToCreate;
+    
+    // Compute number of doc to create to send all beacons
+    if ((nb_detected % maxBeaconToSend) == 0) {
+      nbDocToCreate = nb_detected / maxBeaconToSend; //Number of document required to send all beacons
+    }
+    else {
+      nbDocToCreate = nb_detected / maxBeaconToSend + 1; //Number of document required to send all beacons
+    }
+    
     for (uint8_t j = 0; j < nbDocToCreate; j++) {
       uint8_t endIdx = startIdx + maxBeaconToSend; //Index of the last beacon to send 
       
