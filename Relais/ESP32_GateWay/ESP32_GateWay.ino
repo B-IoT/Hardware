@@ -1,11 +1,14 @@
-/*Version: V2.1 
+/*Version: V2.2 
  * Caractéristics: 
  * Treatment beacon: V2 
- *                 : Movement filter: Packet location filter 
+ *                 : Few received packets per beacon 
+ *                 : Remove location packet filter
+ *                 : Movement filter: Time since last movement from TLM packet 
  * ESP synchronization: NO                 
  * JSON: 3 by 3
  */
-//Librairies
+ 
+ //Librairies
 #include <ArduinoJson.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
@@ -22,14 +25,14 @@ const char* hardSSID = "IT_ELS";
 const char* hardPassword = "BLIs0urce19";
 
 //MQTT Parameters
+uint8_t maxBeaconToSend = 3; // Max nb of beacons to be sent at the same time to the MQTT
 const char* mqttServer = "mqtt.b-iot.ch";
 const int mqttPort = 1883;
-const char* mqttUser = "test8";
-const char* mqttPassword = "test8";
-const char* relayID = "relay_8";
+const char* mqttUser = "test0";
+const char* mqttPassword = "test0";
+const char* relayID = "relay_0";
 
 //Wi-Fi parameters from MQTT
-uint8_t maxBeaconToSend = 3; // Max nb of beacons to be sent at the same time to the MQTT
 int mqttFloor = 0;
 float mqttLatitude = 0;
 float mqttLongitude = 0;
@@ -50,10 +53,11 @@ const int intensiteOn = 3850;
 const int intensiteOff = 4095;
 
 //scan parameters
-int beaconScanTime = 1; //Scan time must be longer than beacon interval
-uint8_t packetScanTime = 4; //Time to get packet from beacons
-uint8_t nb_detected = 0; //Nb of beacon detected
-uint8_t beaconArray = 0; //Nb of beacon to send
+uint8_t packetScanTime = 4;
+uint8_t beaconScanTime = 1; // Scan time must be longer than beacon interval
+uint8_t nb_detected = 0; // Nb of beacon detected
+uint8_t beaconArray = 0; // Nb of beacon to send
+
 
 //Client name for the MQTT
 WiFiClient espclient;
@@ -100,6 +104,7 @@ void setup() { //Setup - 10s
   client.setServer(mqttServer, mqttPort);
   client.setCallback(callback);   
 }
+
 
 void loop() {
 
