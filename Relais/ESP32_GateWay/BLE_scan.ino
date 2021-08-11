@@ -1,193 +1,120 @@
-// Beacon states 
-enum states {MOVE, BTN, MOVE_AND_BTN, NOTHING};
-
-// Collect all device characteristics and store in BeaconData
-typedef struct BeaconData {
-  char address[18];  // mac address (67:f1:d2:04:cd:5d)
+// We collect each device caracteristics and store them in BeaconData
+typedef struct {
+  char id[25]; //Device Name
+  char address[18]; // 67:f1:d2:04:cd:5d (mac address)
   int rssi;
   int txPower;
-  uint8_t batteryLevel; // Beacon Battery
-  int8_t temperature;  // Beacon Temperature
-  uint8_t number = 0; // Indice of the beacon found
-  uint8_t timeSinceLastClick = 255; // Number of seconds since the last click on button (Saturation value)
-  uint8_t timeSinceLastMove = 255; // Number of seconds since the last movement (Saturation value)
-  uint8_t state = NOTHING; // State of the beacon
+  uint8_t batteryLevel = 80; // Beacon Battery
+  int8_t temperature = 22;  // Beacon Temperature
+  uint8_t state = 0; // State of the beacon move
+  
 } BeaconData;
 
-bool beaconFound = false; // New Biot beacon to store
-BeaconData buffer[50]; 
-   // Buffer to store found device data
-BeaconData tabToSend[15]; // Table to store beacons to send
-
-//Kontakt identifier for parsing payload Data [hexadecimal number]
-char * biotName = "42494f54"; //BIOT in heaxadecimal
-// To improve dev
-//char * payloadKontaktID = "6afe02";
-//char * payloadKontaktTLMID = "6afe030902";
-//char * payloadKontaktButtonID = "6afe03030d";
-//char * payloadKontaktLocationID = "6afe05";
+uint8_t bufferIndex = 0;  // Found devices counter
+BeaconData buffer[50];    // Buffer to store found devices data
 
 class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
   public:
     void onResult(BLEAdvertisedDevice advertisedDevice) {
+      extern uint8_t bufferIndex;
       extern BeaconData buffer[];
 
-      if (nb_detected >= 50) {
+      if (bufferIndex >= 50) {
         return;
       }
 
-      // Bool initialization
-      beaconFound = false;
-
-      // Packet acquisition
-      uint8_t* payLoad = advertisedDevice.getPayload(); // Get the entire packet
-      char* payLoadHex = BLEUtils::buildHexData(nullptr, advertisedDevice.getPayload(), advertisedDevice.getPayloadLength()); // Convert the packet in hexadecimal string
-//      Serial.print("payLoadHex =");
-//      Serial.println(payLoadHex);
-//      Serial.print("name = ");
-//      Serial.println(advertisedDevice.getName().c_str());
-      // Biot Beacon check
-      char* biotFound = strstr(payLoadHex, biotName);
-
-      // Filter: Biot packet 
-      if (biotFound != NULL) {
-          //Serial.println("biot found");
-        // Copy the actual mac adress to analyze it (for better reading)
-        char macAdressReceived[18] ;
-        strcpy(macAdressReceived, advertisedDevice.getAddress().toString().c_str());
-
-        // First beacon found
-        if (nb_detected == 0) {
-          strcpy (buffer[nb_detected].address, macAdressReceived);
-          buffer[nb_detected].number = nb_detected;
-          parsePayload(payLoad, nb_detected); //Parse correctly the data
-          getRSSIBeacon(advertisedDevice, nb_detected); 
-          nb_detected++;
-        }
-        
-        // Other beacons to store
-        else if (nb_detected != 0) {
-          //Check if the beacon already exist         
-          for (uint8_t idx = 0; idx < nb_detected; idx++) {
-            if (strcmp(buffer[idx].address, macAdressReceived) == 0) { // if the beacon already exists           
-              beaconFound = true;
-              parsePayload(payLoad, idx); // Parse correctly the data             
-              getRSSIBeacon(advertisedDevice, nb_detected); 
-//              Serial.println(strlen(payLoadHex));
-//              Serial.println("beacon exist");
-              break;
-            }
-          }
-
-          if (beaconFound == false) {
-            strcpy (buffer[nb_detected].address, macAdressReceived); // Store a new Biot beacon
-            buffer[nb_detected].number = nb_detected;
-            parsePayload(payLoad, nb_detected); // Parse correctly the data
-            getRSSIBeacon(advertisedDevice, nb_detected); 
-            nb_detected++;
-          }          
-        }
+      //Name
+      if (advertisedDevice.haveName()) {
+        strcpy (buffer[bufferIndex].id, advertisedDevice.getName().c_str());
       }
+      //RSSI
+      if (advertisedDevice.haveRSSI()) {
+        buffer[bufferIndex].rssi = advertisedDevice.getRSSI();
+      } else {
+        buffer[bufferIndex].rssi =  0;
+      }
+      //MAC Adresse
+      strcpy (buffer[bufferIndex].address, advertisedDevice.getAddress().toString().c_str());
+
+      //TX Power
+      if (advertisedDevice.haveTXPower()) {
+        buffer[bufferIndex].txPower = advertisedDevice.getTXPower();
+      }
+
+      //Debug Print
+      /*Serial.printf("name: %s \n", advertisedDevice.getName().c_str());
+        Serial.printf("MAC: %s \n", advertisedDevice.getAddress().toString().c_str());
+        Serial.printf("Manufactuerer Data: %d \n", advertisedDevice.getManufacturerData());
+        Serial.printf("RSSI: %d \n", advertisedDevice.getRSSI());
+        Serial.printf("TX Power: %d \n", advertisedDevice.getTXPower());*/
+      bufferIndex++;
     }
 };
 
 void ScanBeacons() {
 
-//Time measurement for dev
-//  unsigned long Temps_start_us, Temps_stop_us, Duree_us;
-//  Temps_start_us = millis();
-
-beaconArray = 0;
-
- 
-  // Start scan beacon 
-  BLEScan* pBLEScan = BLEDevice::getScan(); // Create new scan
-  MyAdvertisedDeviceCallbacks cb; // Define callback
+  BLEScan* pBLEScan = BLEDevice::getScan(); //create new scan
+  MyAdvertisedDeviceCallbacks cb; //define callback
   pBLEScan->setAdvertisedDeviceCallbacks(&cb);
-  
-  // Collect the most packet per beacon 
-  for (uint8_t i = 0; i < packetScanTime; i++){
-    pBLEScan->setActiveScan(true); // Active scan uses more power, but get results faster
-    BLEScanResults foundDevices = pBLEScan->start(beaconScanTime);
-  }
-  
+  pBLEScan->setActiveScan(true); //active scan uses more power, but get results faster
+  BLEScanResults foundDevices = pBLEScan->start(beaconScanTime);
   BLEDevice::getScan()->stop(); // Stop BLE
 
-  // Status check and assignment 
-  for (uint8_t i = 0; i < nb_detected; i++) {  
-    if (buffer[i].timeSinceLastMove <= 15 && buffer[i].timeSinceLastClick <= 20) {
-      buffer[i].state = MOVE_AND_BTN;
-    }
-    else if (buffer[i].timeSinceLastMove <= 15) {
-      buffer[i].state = MOVE;
-    }
-    else if ( buffer[i].timeSinceLastClick <= 20) {
-      buffer[i].state = BTN;
-    }
-    else{
-      buffer[i].state = NOTHING;
+
+  //Deprecated but kept for dev
+  char whiteList[12][18] = // 10 is the length of the longest string + 1 ( for the '\0' at the end ) DEPRECATED
+  {
+    "d4:80:72:2f:95:aa",
+    "e0:51:30:48:16:e5",
+    "f5:a8:ef:56:d7:c0",
+    "e2:30:d3:c9:fb:66",
+    "d1:cf:96:e7:33:ed",
+    "f9:b3:b2:3d:53:a5",
+    "c6:c6:f1:4d:24:13",
+    "d9:ad:89:d1:a7:75",
+    "f0:15:b5:dd:24:38",
+    "ca:36:8b:4a:a6:1c",
+    "ff:d8:05:64:9a:9c",
+    "d5:b1:89:8b:b8:c5"
+  };
+
+  //checking whitelist
+  nb_detected = 0;
+  for (uint8_t i = 0; i <= bufferIndex; i++) {
+    for (uint8_t j = 0; j <= sizeof(whiteList) / 18 ; j++) {
+      if (strcmp(buffer[i].address, whiteList[j]) == 0) {
+        strcpy(buffer[nb_detected].id, buffer[i].id);
+        strcpy(buffer[nb_detected].address, buffer[i].address);
+        buffer[nb_detected].rssi = buffer[i].rssi;
+        buffer[nb_detected].txPower = buffer[i].txPower;
+        nb_detected++;
+      }
     }
   }
-  
-  // Stock data of beacon to send and check empty mac adress
-  for (uint8_t i = 0; i < nb_detected; i++) {
-    if (buffer[i].state != NOTHING && strlen(buffer[i].address) != 18 && buffer[i].rssi != 0 && buffer[i].temperature != atoi(" ") && buffer[i].batteryLevel != atoi(" ")) {
-      tabToSend[beaconArray].number = buffer[i].number;
-      strcpy(tabToSend[beaconArray].address, buffer[i].address);
-      tabToSend[beaconArray].rssi = buffer[i].rssi;
-      tabToSend[beaconArray].txPower = buffer[i].txPower;
-      tabToSend[beaconArray].state = buffer[i].state;
-      tabToSend[beaconArray].batteryLevel = buffer[i].batteryLevel;
-      tabToSend[beaconArray].temperature = buffer[i].temperature;
-      tabToSend[beaconArray].timeSinceLastClick = buffer[i].timeSinceLastClick;
-      tabToSend[beaconArray].timeSinceLastMove = buffer[i].timeSinceLastMove;
-      beaconArray ++;
-    }
-  }
-  
-// Time measurement for dev 
-//  Temps_stop_us = millis();
-//  Duree_us = Temps_stop_us - Temps_start_us;
-//  Serial.print("Duree scan beacon = ");
-//  Serial.println(Duree_us);
-  
+
   //Prints to show in Serial
-  /*Serial.print("\n\n");
+  Serial.print("\n\n");
   //printLocalTime();
   Serial.print("B-IoT devices found: ");
   Serial.println(nb_detected);
-  Serial.print("B-IoT devices to send: ");
-  Serial.println(beaconArray);
+  for (uint8_t i = 0; i < nb_detected; i++) {
 
-  for (uint8_t w = 0; w < beaconArray; w++)
-  {
-    Serial.println("----------------------------------");
-    Serial.printf("indice tableau = %d \n", w);
-    Serial.print("address: ");
-    Serial.println(tabToSend[w].address) ;
-//    Serial.print("State 0 1 2: ");
-//    Serial.println(tabToSend[w].state);
-//    Serial.print("Number: ");
-//    Serial.println(tabToSend[w].number);
-//    Serial.print("txPower: ");
-//    Serial.println(tabToSend[w].txPower) ;
-//    Serial.print("rssi: ");
-//    Serial.println(tabToSend[w].rssi) ;
-    Serial.print("TimeMvt: ");
-    Serial.println(tabToSend[w].timeSinceLastMove);
-    Serial.print("Time button: ");
-    Serial.println(tabToSend[w].timeSinceLastClick);
-//    Serial.print("Batterylevel: ");
-//    Serial.println(tabToSend[w].batteryLevel) ;
-//    Serial.print("Temperature: ");
-//    Serial.println(tabToSend[w].temperature );
+    Serial.print("Name: ");
+    Serial.println(buffer[i].id);
+    Serial.print("Mac: ");
+    Serial.println(buffer[i].address);
+    Serial.print("RSSI: ");
+    Serial.println(buffer[i].rssi);
+    Serial.print("TX Power: ");
+    Serial.println(buffer[i].txPower);
+     Serial.print("Batterie: ");
+    Serial.println(buffer[i].batteryLevel);
+    Serial.print("Temperature: ");
+    Serial.println(buffer[i].temperature);
+    Serial.print("state: ");
+    Serial.println(buffer[i].state);
+    Serial.println("---------------------");
   }
-
-  Serial.println("---------------------");
-  //delay(500);
-  Serial.println("\nScan done!\n");*/
-
-  //delay(500);
-//nb_detected =0;
- 
+  bufferIndex = 0;
+  Serial.println("\nScan done!\n");
 }
