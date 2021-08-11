@@ -1,4 +1,3 @@
-//DynamicJsonDocument doc(2048); // old version working
 void connect_MQTT() {
 
   //Creating the Json document to send
@@ -15,17 +14,17 @@ void connect_MQTT() {
   while (!client.connected()) {
     //if wifi deconnects after the first check
     if(WiFi.status() != WL_CONNECTED) {
-      Serial.println("Wifi exit ...");
-      break;
-    }
-            
+          Serial.println("Wifi exit ...");
+          break;
+        }
+
     // Attempt to connect
     Serial.print("Connecting to ");
     Serial.println(mqttServer);
     ledBlueOn();
 
     delay(500);
-    if (client.connect(relayID, mqttUser, mqttPassword, "will", 1, false, buffer)) { //new version
+    if (client.connect(relayID, mqttUser, mqttPassword, "will", 1, false, buffer)) {
       // Subscribe to channel
       Serial.print("update.parameters state : ");
       Serial.println(client.subscribe("update.parameters"));
@@ -42,7 +41,6 @@ void connect_MQTT() {
   }
 }
 
-//Listen message from backend
 void callback(char* topic, byte* message, unsigned int length) {
 
   DynamicJsonDocument doc(500);
@@ -76,65 +74,55 @@ void callback(char* topic, byte* message, unsigned int length) {
   mqttLatitude = doc["latitude"];
   mqttLongitude = doc["longitude"];
   mqttSSID = strdup(doc["wifi"]["ssid"]);
-  mqttPasswordWIFI = strdup(doc["wifi"]["password"]);
-
-
-  //const char* mac = doc["beacon"]["mac"]; //deprecated
-  //long txPower = doc["beacon"]["txPower"]; //deprecated
-  //bool ledStatus = doc["ledStatus"];
-  //digitalWrite (ledPin, ledStatus); //puts the led in the chosen status by MQTT
-
-  /*Serial.println(mac);
-    Serial.println(txPower);
-    Serial.println(ledStatus);
-    Serial.println("\n--------\n");*/
-
+  mqttPasswordWIFI = strdup(doc["wifi"]["password"]); 
 }
 
 void send_MQTT() {
   
-  // Parse the JSON condition 
-  if (beaconArray > maxBeaconToSend) {
+  //Parse the JSON condition 
+  /*NOTE: JSON is sending one by one because of a problem occuring from the reception on the backend */
+  /*Code in comments allows to send 3 by 3 */
+  /*if (nb_detected > maxBeaconToSend) {
     uint8_t startIdx = 0; // Index of the first beacon to send
-    uint8_t nbDocToCreate;
-    
+    uint8_t nbDocToCreate;*/
+    uint8_t startIdx = 0;
+    uint8_t nbDocToCreate = nb_detected;
     // Compute number of doc to create to send all beacons
-    if ((beaconArray % maxBeaconToSend) == 0) {
-      nbDocToCreate = beaconArray / maxBeaconToSend; //Number of document required to send all beacons
+    /*if ((nb_detected % maxBeaconToSend) == 0) {
+      nbDocToCreate = nb_detected / maxBeaconToSend; //Number of document required to send all beacons
     }
     else {
-      nbDocToCreate = beaconArray / maxBeaconToSend + 1; //Number of document required to send all beacons
-    }
-   
+      nbDocToCreate = nb_detected / maxBeaconToSend + 1; //Number of document required to send all beacons
+    }*/
+    
     for (uint8_t j = 0; j < nbDocToCreate; j++) {
       uint8_t endIdx = startIdx + maxBeaconToSend; //Index of the last beacon to send 
       
-      // Creating the Json document to send
-      DynamicJsonDocument doc(500);  //TO INCREASE
+      //Creating the Json document to send
+      DynamicJsonDocument doc(600);  //TO INCREASE
       doc["relayID"] = relayID; //Title of the Json head is the relayID
 
-      // Sanity condition to avoid blank data
-      if (endIdx > beaconArray) {
-        endIdx = beaconArray; 
+      //Sanity condition to avoid blank data
+      if (endIdx > nb_detected) {
+        endIdx = nb_detected; 
       }
-  
-      // Serial print for dev
+      
+      //Serial print for dev
       /*Serial.printf("startIdx = %d \n",startIdx);
       Serial.printf("endix = %d \n",endIdx);*/
       
-      // Fill and send the JSON
+      //Fill and send the JSON
       send_JSON(doc, startIdx, endIdx);
       startIdx += maxBeaconToSend; 
-      
-     }
-    } else {
-      // Creating the Json document to send
-      DynamicJsonDocument doc(500);//TO INCREASE
-      doc["relayID"] = relayID; //title of the Json head is the relayID
-      
-      // Fill and send the JSON
-      send_JSON(doc, 0, beaconArray);
     }
+  /*} else {
+ 
+    //Creating the Json document to send
+    DynamicJsonDocument doc(600);//TO INCREASE
+    doc["relayID"] = relayID; //title of the Json head is the relayID
+    //Fill and send the JSON
+    send_JSON(doc, 0, nb_detected);
+  }*/
 }
 
 //Goal: Fill the doc and send the JSON doc to the mqtt
@@ -143,31 +131,27 @@ void send_MQTT() {
 //            idxEnd: index to stop the filling
 void send_JSON(DynamicJsonDocument doc, uint8_t idxStart, uint8_t idxEnd) {
     
+    
   JsonArray beacons = doc.createNestedArray("beacons"); // Beacon array to send
   
   // Write Beacon data to send
   for (uint8_t i = idxStart; i < idxEnd; i++) {
     DynamicJsonDocument beaconDoc(100); // Json size for on beacon = 78 (measured)
-    beaconDoc["mac"] = tabToSend[i].address;
-    beaconDoc["rssi"] = tabToSend[i].rssi;
-    beaconDoc["battery"] = tabToSend[i].batteryLevel;
-    beaconDoc["temperature"] = tabToSend[i].temperature;
-    beaconDoc["status"] = tabToSend[i].state;
+    beaconDoc["mac"] = buffer[i].address;
+    beaconDoc["rssi"] = buffer[i].rssi;
+    beaconDoc["battery"] = buffer[i].batteryLevel;
+    beaconDoc["temperature"] = buffer[i].temperature;
+    beaconDoc["status"] = buffer[i].state;
     beacons.add(beaconDoc);
   }
-    //To measure Json beacon size (for dev)
-    /*size_t jsonSizebeacon =  measureJson(beaconDoc);//measure number of caracters inside the json serialized
-    Serial.print("taille jsonbeacon= ");
-    Serial.println(jsonSizebeacon);*/
-    
     doc["latitude"] = serialized(String(mqttLatitude, 6)); //latitude of the Json
     doc["longitude"] = serialized(String(mqttLongitude, 6)); //longitude of the Json
     doc["floor"] = mqttFloor;
   
     //Sending the Json
-    char buffer[400];
+    char buffer[600];
+    //Serial.println("Bonjour serial");
     serializeJson(doc, buffer);
-    
     //JSON size for dev
     /*size_t jsonSize =  measureJson(doc);//measure number of caracters inside the json serialized
     Serial.print("JSON SIZE = ");
@@ -177,5 +161,4 @@ void send_JSON(DynamicJsonDocument doc, uint8_t idxStart, uint8_t idxEnd) {
     Serial.println(buffer);
     Serial.println("Sent Json on incoming.update");
     Serial.println("\n---------------------");
-  
 }

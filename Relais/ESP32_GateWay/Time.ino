@@ -7,7 +7,6 @@ void GetTime() {
   const int   daylightOffset_sec = 3600;
 
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-
 }
 
 void printLocalTime()
