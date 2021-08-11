@@ -1,5 +1,5 @@
-/* Goal: Retrieve data from payload
- * packetToParse: Packet received to be analyzed
+/* Goal: Retrieve data from payload*/
+/* packetToParse: Packet received to be analyzed
  * bufferIndex: Index of the beacon to store the data
  */
 void parsePayload(uint8_t* packetToParse, uint8_t bufferIndex) {
@@ -20,12 +20,11 @@ void parsePayload(uint8_t* packetToParse, uint8_t bufferIndex) {
   //Packet Button ID: 6AFE03030D  
   else if (packetToParse[5] == 0x6A && packetToParse[6] == 0xFE && packetToParse[7] == 0x03 && packetToParse[8] == 0x03 && packetToParse[9] == 0x0D) {
     buffer[bufferIndex].timeSinceLastClick = packetToParse[10];
-    
   }
 }
 
-/* Goal: get RSSI beacon
- * advertisedDevice: Device received to analyse
+/* Goal: get RSSI beacon*/
+/* advertisedDevice: Device received to analyse
  * idx: Index of the beacon to store the data
  */
 void getRSSIBeacon(BLEAdvertisedDevice advertisedDevice, uint8_t idx) {
@@ -36,5 +35,4 @@ void getRSSIBeacon(BLEAdvertisedDevice advertisedDevice, uint8_t idx) {
   else {
     buffer[idx].rssi =  0;
   }
-
 }

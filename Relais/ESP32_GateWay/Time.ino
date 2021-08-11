@@ -7,6 +7,7 @@ void GetTime() {
   const int   daylightOffset_sec = 3600;
 
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+
 }
 
 void printLocalTime()
@@ -14,10 +15,10 @@ void printLocalTime()
   //Prints the time in the terminal, main use is for IRL data collecting and prototyping
   struct tm timeinfo;
   if (!getLocalTime(&timeinfo)) {
-    Serial.println("Failed to obtain time");
+    //Serial.println("Failed to obtain time");
     return;
   }
   else {
-    Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S\n");
+    //Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S\n");
   }
 }
