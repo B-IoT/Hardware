@@ -1,7 +1,7 @@
 // We collect each device caracteristics and store them in BeaconData
 typedef struct {
   char id[25]; //Device Name
-  char address[18]; // 67:f1:d2:04:cd:5d (mac address)
+  unsigned char address[6]; // 67:f1:d2:04:cd:5d (mac address)
   int rssi;
   int txPower;
   uint8_t batteryLevel = 80; // Beacon Battery
@@ -34,7 +34,7 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
         buffer[bufferIndex].rssi =  0;
       }
       //MAC Adresse
-      strcpy (buffer[bufferIndex].address, advertisedDevice.getAddress().toString().c_str());
+      memcpy(buffer[bufferIndex].address, advertisedDevice.getAddress().getNative(), ESP_BD_ADDR_LEN);
 
       //TX Power
       if (advertisedDevice.haveTXPower()) {
@@ -61,27 +61,31 @@ void ScanBeacons() {
   BLEDevice::getScan()->stop(); // Stop BLE
 
 
-  //Deprecated but kept for dev
-  char whiteList[5][18] = // 10 is the length of the longest string + 1 ( for the '\0' at the end ) DEPRECATED
+  unsigned char whiteList[5][6] = 
   {
-    "cf:ae:ce:64:a0:f6",
-    "d1:0b:14:b3:18:6a",
-    "fc:02:a0:fa:33:19",
-    "e3:6f:28:36:5a:db",
-    "f1:96:cd:ee:25:bd",
+    { 0xd1, 0x0b, 0x14, 0xb3, 0x18, 0x6a },
+    { 0xfc, 0x02, 0xa0, 0xfa, 0x33, 0x19 },
+    { 0xe3, 0x6f, 0x28, 0x36, 0x5a, 0xdb },
+    { 0xf1, 0x96, 0xcd, 0xee, 0x25, 0xbd }
   };
 
   //checking whitelist
   nb_detected = 0;
   for (uint8_t i = 0; i <= bufferIndex; i++) {
     for (uint8_t j = 0; j <= sizeof(whiteList) / 18 ; j++) {
-      if (strcmp(buffer[i].address, whiteList[j]) == 0) {
-        strcpy(buffer[nb_detected].id, buffer[i].id);
-        strcpy(buffer[nb_detected].address, buffer[i].address);
-        buffer[nb_detected].rssi = buffer[i].rssi;
-        buffer[nb_detected].txPower = buffer[i].txPower;
-        nb_detected++;
-      }
+        uint8_t eq = 1;
+        for (uint8_t k = 0; k < ESP_BD_ADDR_LEN; k++) {
+          if(whiteList[j][k] != buffer[i].address[k]) {
+            eq = 0;
+          }
+        }
+        if(eq) {
+          strcpy(buffer[nb_detected].id, buffer[i].id);
+          memcpy(buffer[nb_detected].address, buffer[i].address, ESP_BD_ADDR_LEN);
+          buffer[nb_detected].rssi = buffer[i].rssi;
+          buffer[nb_detected].txPower = buffer[i].txPower;
+          nb_detected++;
+        }
     }
   }
 
@@ -95,7 +99,7 @@ void ScanBeacons() {
     Serial.print("Name: ");
     Serial.println(buffer[i].id);
     Serial.print("Mac: ");
-    Serial.println(buffer[i].address);
+    Serial.printf("%02x:%02x:%02x:%02x:%02x:%02x", buffer[i].address[0], buffer[i].address[1], buffer[i].address[2], buffer[i].address[3], buffer[i].address[4], buffer[i].address[5]);
     Serial.print("RSSI: ");
     Serial.println(buffer[i].rssi);
     Serial.print("TX Power: ");
