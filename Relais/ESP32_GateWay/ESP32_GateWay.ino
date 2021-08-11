@@ -1,11 +1,10 @@
-/*Version: V1.2 CHUV demo the most stable version to test location engine
+/*Version: V2.1 
  * Caractéristics: 
- * Treatment beacon: V1
- * ESP synchronization: YES                  
- * JSON: 1 by 1
+ * Treatment beacon: V2 
+ *                 : Movement filter: Packet location filter 
+ * ESP synchronization: NO                 
+ * JSON: 3 by 3
  */
- 
-
 //Librairies
 #include <ArduinoJson.h>
 #include <WiFi.h>
@@ -18,7 +17,6 @@
 #include <BLEScan.h>
 #include <BLEAdvertisedDevice.h>
 #include <BLEBeacon.h>
-
 //WiFI parameters
 const char* hardSSID = "IT_ELS";
 const char* hardPassword = "BLIs0urce19";
@@ -26,11 +24,12 @@ const char* hardPassword = "BLIs0urce19";
 //MQTT Parameters
 const char* mqttServer = "mqtt.b-iot.ch";
 const int mqttPort = 1883;
-const char* mqttUser = "testP1";
-const char* mqttPassword = "testP1";
-const char* relayID = "relay_P1";
+const char* mqttUser = "test8";
+const char* mqttPassword = "test8";
+const char* relayID = "relay_8";
 
 //Wi-Fi parameters from MQTT
+uint8_t maxBeaconToSend = 3; // Max nb of beacons to be sent at the same time to the MQTT
 int mqttFloor = 0;
 float mqttLatitude = 0;
 float mqttLongitude = 0;
@@ -46,22 +45,22 @@ const int ledPlus = 1;
 const int freq = 5000;
 const int ledChannelGreen = 0;
 const int ledChannelBlue = 1;
-const int ledChannelRed = 0;
 const int resolution = 12; 
 const int intensiteOn = 3850;
 const int intensiteOff = 4095;
 
-//Scan parameters
-int beaconScanTime = 2; //Scan time must be longer than beacon interval
-uint8_t nb_detected = 0; //Nb of beacons detected
-uint8_t maxBeaconToSend = 1; //Max nb of beacons to be sent at the same time to the MQTT
+//scan parameters
+int beaconScanTime = 1; //Scan time must be longer than beacon interval
+uint8_t packetScanTime = 4; //Time to get packet from beacons
+uint8_t nb_detected = 0; //Nb of beacon detected
+uint8_t beaconArray = 0; //Nb of beacon to send
 
 //Client name for the MQTT
 WiFiClient espclient;
 PubSubClient client(espclient);
 
 void setup() { //Setup - 10s
- 
+
   //Set up the LED pin - TBM into RGB
   pinMode (ledGreen, OUTPUT);
   pinMode (ledPlus, OUTPUT);
@@ -75,11 +74,9 @@ void setup() { //Setup - 10s
   
   ledcSetup(ledChannelGreen, freq, resolution);
   ledcSetup(ledChannelBlue, freq, resolution);
-  ledcSetup(ledChannelRed, freq, resolution);
   
   ledcAttachPin(ledGreen, ledChannelGreen);
   ledcAttachPin(ledBlue, ledChannelBlue);
-  ledcAttachPin(ledRed, ledChannelRed);
   
   ledGreenOn();
   
@@ -105,44 +102,23 @@ void setup() { //Setup - 10s
 }
 
 void loop() {
-   
-  struct tm timeinfo;
-    
+
    //Checking Wifi
   if(WiFi.status() != WL_CONNECTED) {
     connect_wifi();
-  }
+}
 
   //Checking MQTT if Wifi connected
-  if(WiFi.status() == WL_CONNECTED && !client.connected()) {
+  if(WiFi.status() == WL_CONNECTED && !client.connected()){
     connect_MQTT(); 
   }
-  
   //Looks for MQTT messages to read (params to update)
   client.loop();
 
   //Scan the beacons around
   ScanBeacons();
-  getLocalTime(&timeinfo);
-  char timeSec[3];
-  strftime(timeSec, 3, "%S", &timeinfo);
-
-  while(String(timeSec).toInt() % 3 != 0) {
-     getLocalTime(&timeinfo);
-     strftime(timeSec,3, "%S", &timeinfo);
-     //Serial.println(timeSec);
-  }
-
-  //Send to MQTT after the first update
-  if (String(timeSec).toInt() % 3 == 0 && nb_detected > 0 && mqttLatitude != 0 && mqttLongitude != 0) {
-    /*Print for dev
-      Serial.print("send mqqtt at :");
-      Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S\n");
-      Serial.println(timeSec);*/
-
-    ledRedOn(); //To see the sending
+  //Send an MQTT after the first update
+  if (beaconArray > 0 && mqttLatitude!=0 && mqttLongitude!=0){
     send_MQTT();
-    delay(100);
-    ledOff();
   }
 }
