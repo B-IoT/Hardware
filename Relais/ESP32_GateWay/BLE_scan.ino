@@ -1,7 +1,7 @@
 // We collect each device caracteristics and store them in BeaconData
 typedef struct {
   char id[25]; //Device Name
-  unsigned char address[6]; // 67:f1:d2:04:cd:5d (mac address)
+  uint8_t address[6]; // 67:f1:d2:04:cd:5d (mac address)
   int rssi;
   int txPower;
   uint8_t batteryLevel = 80; // Beacon Battery
@@ -12,6 +12,7 @@ typedef struct {
 
 uint8_t bufferIndex = 0;  // Found devices counter
 BeaconData buffer[50];    // Buffer to store found devices data
+
 
 class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
   public:
@@ -61,7 +62,7 @@ void ScanBeacons() {
   BLEDevice::getScan()->stop(); // Stop BLE
 
 
-  unsigned char whiteList[5][6] = 
+  uint8_t whiteList[5][6] = 
   {
     { 0xd1, 0x0b, 0x14, 0xb3, 0x18, 0x6a },
     { 0xfc, 0x02, 0xa0, 0xfa, 0x33, 0x19 },
