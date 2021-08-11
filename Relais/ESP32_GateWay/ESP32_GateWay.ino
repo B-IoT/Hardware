@@ -1,8 +1,8 @@
-/*Version: V1.0 Triangulation Test
+/*Version: V1.1 CHUV demo 
  * Caractéristics: 
  * Treatment beacon: V1
  * ESP synchronization: NO                  
- * JSON: 1 by 1
+ * JSON: 3 by 3
  */
  
 //Librairies
@@ -45,7 +45,6 @@ const int ledPlus = 1;
 const int freq = 5000;
 const int ledChannelGreen = 0;
 const int ledChannelBlue = 1;
-const int ledChannelRed = 0;
 const int resolution = 12; 
 const int intensiteOn = 3850;
 const int intensiteOff = 4095;
@@ -53,14 +52,14 @@ const int intensiteOff = 4095;
 //Scan parameters
 int beaconScanTime = 2; //Scan time must be longer than beacon interval
 uint8_t nb_detected = 0; //Nb of beacons detected
-uint8_t maxBeaconToSend = 1; //Max nb of beacons to be sent at the same time to the MQTT
+uint8_t maxBeaconToSend = 3; //Max nb of beacons to be sent at the same time to the MQTT
 
 //Client name for the MQTT
 WiFiClient espclient;
 PubSubClient client(espclient);
 
 void setup() { //Setup - 10s
- 
+
   //Set up the LED pin - TBM into RGB
   pinMode (ledGreen, OUTPUT);
   pinMode (ledPlus, OUTPUT);
@@ -74,11 +73,9 @@ void setup() { //Setup - 10s
   
   ledcSetup(ledChannelGreen, freq, resolution);
   ledcSetup(ledChannelBlue, freq, resolution);
-  ledcSetup(ledChannelRed, freq, resolution);
   
   ledcAttachPin(ledGreen, ledChannelGreen);
   ledcAttachPin(ledBlue, ledChannelBlue);
-  ledcAttachPin(ledRed, ledChannelRed);
   
   ledGreenOn();
   
@@ -104,8 +101,7 @@ void setup() { //Setup - 10s
 }
 
 void loop() {
-    //struct tm timeinfo;
-    //
+
    //Checking Wifi
   if(WiFi.status() != WL_CONNECTED) {
     connect_wifi();
@@ -121,10 +117,9 @@ void loop() {
 
   //Scan the beacons around
   ScanBeacons();
-
+  
   //Send to MQTT after the first update
-  if (nb_detected > 0 && mqttLatitude != 0 && mqttLongitude != 0) {
+  if (nb_detected > 0 && mqttLatitude!=0 && mqttLongitude!=0) {
     send_MQTT();
-
   }
 }
