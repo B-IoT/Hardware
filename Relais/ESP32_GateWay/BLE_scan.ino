@@ -87,7 +87,7 @@ void ScanBeacons() {
 
   //Prints to show in Serial
   Serial.print("\n\n");
-  printLocalTime();
+  //printLocalTime();
   Serial.print("B-IoT devices found: ");
   Serial.println(nb_detected);
   for (uint8_t i = 0; i < nb_detected; i++) {

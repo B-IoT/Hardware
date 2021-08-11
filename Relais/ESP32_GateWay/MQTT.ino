@@ -80,23 +80,26 @@ void callback(char* topic, byte* message, unsigned int length) {
 void send_MQTT() {
   
   //Parse the JSON condition 
-  if (nb_detected > maxBeaconToSend) {
+  /*NOTE: JSON is sending one by one because of a problem occuring from the reception on the backend */
+  /*Code in comments allows to send 3 by 3 */
+  /*if (nb_detected > maxBeaconToSend) {
     uint8_t startIdx = 0; // Index of the first beacon to send
-    uint8_t nbDocToCreate;
-    
+    uint8_t nbDocToCreate;*/
+    uint8_t startIdx = 0;
+    uint8_t nbDocToCreate = nb_detected;
     // Compute number of doc to create to send all beacons
-    if ((nb_detected % maxBeaconToSend) == 0) {
+    /*if ((nb_detected % maxBeaconToSend) == 0) {
       nbDocToCreate = nb_detected / maxBeaconToSend; //Number of document required to send all beacons
     }
     else {
       nbDocToCreate = nb_detected / maxBeaconToSend + 1; //Number of document required to send all beacons
-    }
+    }*/
     
     for (uint8_t j = 0; j < nbDocToCreate; j++) {
       uint8_t endIdx = startIdx + maxBeaconToSend; //Index of the last beacon to send 
       
       //Creating the Json document to send
-      DynamicJsonDocument doc(500);  //TO INCREASE
+      DynamicJsonDocument doc(600);  //TO INCREASE
       doc["relayID"] = relayID; //Title of the Json head is the relayID
 
       //Sanity condition to avoid blank data
@@ -112,14 +115,14 @@ void send_MQTT() {
       send_JSON(doc, startIdx, endIdx);
       startIdx += maxBeaconToSend; 
     }
-  } else {
+  /*} else {
  
     //Creating the Json document to send
-    DynamicJsonDocument doc(500);//TO INCREASE
+    DynamicJsonDocument doc(600);//TO INCREASE
     doc["relayID"] = relayID; //title of the Json head is the relayID
     //Fill and send the JSON
     send_JSON(doc, 0, nb_detected);
-  }
+  }*/
 }
 
 //Goal: Fill the doc and send the JSON doc to the mqtt
@@ -146,7 +149,8 @@ void send_JSON(DynamicJsonDocument doc, uint8_t idxStart, uint8_t idxEnd) {
     doc["floor"] = mqttFloor;
   
     //Sending the Json
-    char buffer[400];
+    char buffer[600];
+    //Serial.println("Bonjour serial");
     serializeJson(doc, buffer);
     //JSON size for dev
     /*size_t jsonSize =  measureJson(doc);//measure number of caracters inside the json serialized
