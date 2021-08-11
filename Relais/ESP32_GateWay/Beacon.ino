@@ -36,4 +36,5 @@ void getRSSIBeacon(BLEAdvertisedDevice advertisedDevice, uint8_t idx) {
   else {
     buffer[idx].rssi =  0;
   }
+
 }
