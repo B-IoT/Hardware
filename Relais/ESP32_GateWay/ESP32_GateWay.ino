@@ -19,6 +19,8 @@
 #include <BLEAdvertisedDevice.h>
 #include <BLEBeacon.h>
 
+#define MAC_ADDRESS_STRING_LENGTH 18
+
 //WiFI parameters
 const char* hardSSID = "IT_ELS";
 const char* hardPassword = "BLIs0urce19";

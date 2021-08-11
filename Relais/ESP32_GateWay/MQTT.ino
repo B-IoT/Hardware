@@ -137,7 +137,10 @@ void send_JSON(DynamicJsonDocument doc, uint8_t idxStart, uint8_t idxEnd) {
   // Write Beacon data to send
   for (uint8_t i = idxStart; i < idxEnd; i++) {
     DynamicJsonDocument beaconDoc(100); // Json size for on beacon = 78 (measured)
-    beaconDoc["mac"] = buffer[i].address;
+
+    char macAddressString[18];
+    snprintf(macAddressString, MAC_ADDRESS_STRING_LENGTH, "%02x:%02x:%02x:%02x:%02x:%02x", buffer[i].address[0], buffer[i].address[1], buffer[i].address[2], buffer[i].address[3], buffer[i].address[4], buffer[i].address[5]);
+    beaconDoc["mac"] = macAddressString;
     beaconDoc["rssi"] = buffer[i].rssi;
     beaconDoc["battery"] = buffer[i].batteryLevel;
     beaconDoc["temperature"] = buffer[i].temperature;
