@@ -1,5 +1,9 @@
 void connect_wifi() {
 
+
+  Serial.println("Enable Wifi access point");
+  WiFi.enableSTA(true);
+  delay(500);
   Serial.print("\nChecking WiFi..");
   
   while (WiFi.status() != WL_CONNECTED) { //Keeps trying to connect until it's ok
