@@ -1,7 +1,7 @@
 // We collect each device caracteristics and store them in BeaconData
 typedef struct {
   char id[25]; //Device Name
-  uint8_t address[6]; // 67:f1:d2:04:cd:5d (mac address)
+  uint8_t address[MAC_ADDRESS_LENGTH]; // 67:f1:d2:04:cd:5d (mac address)
   int rssi;
   int txPower;
   uint8_t batteryLevel = 80; // Beacon Battery
@@ -12,6 +12,7 @@ typedef struct {
 
 uint8_t bufferIndex = 0;  // Found devices counter
 BeaconData buffer[50];    // Buffer to store found devices data
+uint8_t whiteList[WHITELIST_LENGTH][MAC_ADDRESS_LENGTH]; // White list for the MAC
 
 
 class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
@@ -35,7 +36,7 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
         buffer[bufferIndex].rssi =  0;
       }
       //MAC Adresse
-      memcpy(buffer[bufferIndex].address, advertisedDevice.getAddress().getNative(), ESP_BD_ADDR_LEN);
+      memcpy(buffer[bufferIndex].address, advertisedDevice.getAddress().getNative(), MAC_ADDRESS_LENGTH);
 
       //TX Power
       if (advertisedDevice.haveTXPower()) {
@@ -62,13 +63,33 @@ void ScanBeacons() {
   BLEDevice::getScan()->stop(); // Stop BLE
 
 
-  uint8_t whiteList[5][6] = 
-  {
-    { 0xd1, 0x0b, 0x14, 0xb3, 0x18, 0x6a },
-    { 0xfc, 0x02, 0xa0, 0xfa, 0x33, 0x19 },
-    { 0xe3, 0x6f, 0x28, 0x36, 0x5a, 0xdb },
-    { 0xf1, 0x96, 0xcd, 0xee, 0x25, 0xbd }
-  };
+  whiteList[0][0] = 0xd1;
+  whiteList[0][1] = 0x0b;
+  whiteList[0][2] = 0x14;
+  whiteList[0][3] = 0xb3;
+  whiteList[0][4] = 0x18;
+  whiteList[0][5] = 0x6a;
+  
+  whiteList[1][0] = 0xfc;
+  whiteList[1][1] = 0x02;
+  whiteList[1][2] = 0xa0;
+  whiteList[1][3] = 0xfa;
+  whiteList[1][4] = 0x33;
+  whiteList[1][5] = 0x19;
+  
+  whiteList[2][0] = 0xe3;
+  whiteList[2][1] = 0x6f;
+  whiteList[2][2] = 0x28;
+  whiteList[2][3] = 0x36;
+  whiteList[2][4] = 0x5a;
+  whiteList[2][5] = 0xdb;
+  
+  whiteList[3][0] = 0xf1;
+  whiteList[3][1] = 0x96;
+  whiteList[3][2] = 0xcd;
+  whiteList[3][3] = 0xee;
+  whiteList[3][4] = 0x25;
+  whiteList[3][5] = 0xbd;
 
   //checking whitelist
   nb_detected = 0;
@@ -82,7 +103,7 @@ void ScanBeacons() {
         }
         if(eq) {
           strcpy(buffer[nb_detected].id, buffer[i].id);
-          memcpy(buffer[nb_detected].address, buffer[i].address, ESP_BD_ADDR_LEN);
+          memcpy(buffer[nb_detected].address, buffer[i].address, MAC_ADDRESS_LENGTH);
           buffer[nb_detected].rssi = buffer[i].rssi;
           buffer[nb_detected].txPower = buffer[i].txPower;
           nb_detected++;
