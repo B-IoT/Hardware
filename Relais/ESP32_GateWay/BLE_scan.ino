@@ -93,10 +93,10 @@ void ScanBeacons() {
 
   //checking whitelist
   nb_detected = 0;
-  for (uint8_t i = 0; i <= bufferIndex; i++) {
-    for (uint8_t j = 0; j <= sizeof(whiteList) / 18 ; j++) {
+  for (int i = 0; i <= bufferIndex; i++) {
+    for (int j = 0; j <= sizeof(whiteList) / 18 ; j++) {
         uint8_t eq = 1;
-        for (uint8_t k = 0; k < ESP_BD_ADDR_LEN; k++) {
+        for (int k = 0; k < MAC_ADDRESS_LENGTH; k++) {
           if(whiteList[j][k] != buffer[i].address[k]) {
             eq = 0;
           }
