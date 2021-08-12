@@ -25,31 +25,55 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
         return;
       }
 
-      //Name
-      if (advertisedDevice.haveName()) {
-        strcpy (buffer[bufferIndex].id, advertisedDevice.getName().c_str());
-      }
-      //RSSI
-      if (advertisedDevice.haveRSSI()) {
-        buffer[bufferIndex].rssi = advertisedDevice.getRSSI();
-      } else {
-        buffer[bufferIndex].rssi =  0;
-      }
-      //MAC Adresse
-      memcpy(buffer[bufferIndex].address, advertisedDevice.getAddress().getNative(), MAC_ADDRESS_LENGTH);
+      // First check that MAC Address is in the whitelist
+      uint8_t receivedMac[MAC_ADDRESS_LENGTH];
+      memcpy(receivedMac, advertisedDevice.getAddress().getNative(), MAC_ADDRESS_LENGTH);
 
-      //TX Power
-      if (advertisedDevice.haveTXPower()) {
-        buffer[bufferIndex].txPower = advertisedDevice.getTXPower();
-      }
+      uint8_t presentInWhiteList = 0;
+      nb_detected = 0;
 
-      //Debug Print
-      /*Serial.printf("name: %s \n", advertisedDevice.getName().c_str());
-        Serial.printf("MAC: %s \n", advertisedDevice.getAddress().toString().c_str());
-        Serial.printf("Manufactuerer Data: %d \n", advertisedDevice.getManufacturerData());
-        Serial.printf("RSSI: %d \n", advertisedDevice.getRSSI());
-        Serial.printf("TX Power: %d \n", advertisedDevice.getTXPower());*/
-      bufferIndex++;
+      for (int j = 0; j < WHITELIST_LENGTH ; j++) {
+          uint8_t eq = 1;
+          for (int k = 0; k < MAC_ADDRESS_LENGTH; k++) {
+            if(whiteList[j][k] != receivedMac[k]) {
+              eq = 0;
+              break;
+            }
+          }
+          if(eq) {
+            presentInWhiteList = 1;
+            break;
+          }
+      }
+      
+      if(presentInWhiteList){
+        //Name
+        if (advertisedDevice.haveName()) {
+          strcpy (buffer[bufferIndex].id, advertisedDevice.getName().c_str());
+        }
+        //RSSI
+        if (advertisedDevice.haveRSSI()) {
+          buffer[bufferIndex].rssi = advertisedDevice.getRSSI();
+        } else {
+          buffer[bufferIndex].rssi =  0;
+        }
+        //MAC Adresse
+        memcpy(buffer[bufferIndex].address, receivedMac, MAC_ADDRESS_LENGTH);
+  
+        //TX Power
+        if (advertisedDevice.haveTXPower()) {
+          buffer[bufferIndex].txPower = advertisedDevice.getTXPower();
+        }
+  
+        //Debug Print
+        /*Serial.printf("name: %s \n", advertisedDevice.getName().c_str());
+          Serial.printf("MAC: %s \n", advertisedDevice.getAddress().toString().c_str());
+          Serial.printf("Manufactuerer Data: %d \n", advertisedDevice.getManufacturerData());
+          Serial.printf("RSSI: %d \n", advertisedDevice.getRSSI());
+          Serial.printf("TX Power: %d \n", advertisedDevice.getTXPower());*/
+        bufferIndex++;
+      }
+      
     }
 };
 
@@ -92,31 +116,14 @@ void ScanBeacons() {
   whiteList[3][5] = 0xbd;
 
   //checking whitelist
-  nb_detected = 0;
-  for (int i = 0; i <= bufferIndex; i++) {
-    for (int j = 0; j <= sizeof(whiteList) / 18 ; j++) {
-        uint8_t eq = 1;
-        for (int k = 0; k < MAC_ADDRESS_LENGTH; k++) {
-          if(whiteList[j][k] != buffer[i].address[k]) {
-            eq = 0;
-          }
-        }
-        if(eq) {
-          strcpy(buffer[nb_detected].id, buffer[i].id);
-          memcpy(buffer[nb_detected].address, buffer[i].address, MAC_ADDRESS_LENGTH);
-          buffer[nb_detected].rssi = buffer[i].rssi;
-          buffer[nb_detected].txPower = buffer[i].txPower;
-          nb_detected++;
-        }
-    }
-  }
+  nb_detected = bufferIndex;
 
   //Prints to show in Serial
   Serial.print("\n\n");
   //printLocalTime();
   Serial.print("B-IoT devices found: ");
   Serial.println(nb_detected);
-  for (uint8_t i = 0; i < nb_detected; i++) {
+  for (int i = 0; i < nb_detected; i++) {
 
     Serial.print("Name: ");
     Serial.println(buffer[i].id);
