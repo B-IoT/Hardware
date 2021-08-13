@@ -19,7 +19,7 @@
 #include <BLEAdvertisedDevice.h>
 #include <BLEBeacon.h>
 
-#define MAC_ADDRESS_STRING_LENGTH 18
+#define MAC_ADDRESS_STRING_LENGTH 18 // accounting for the null char
 #define MAC_ADDRESS_LENGTH 6
 #define WHITELIST_LENGTH 1024
 
@@ -27,8 +27,8 @@
 //const char* hardSSID = "IT_ELS";
 //const char* hardPassword = "BLIs0urce19";
 
-const char* hardSSID = "test";
-const char* hardPassword = "test12345";
+const char* hardSSID = "iPhone de Samuel";
+const char* hardPassword = "12345678";
 
 //MQTT Parameters
 const char* mqttServer = "mqtt.b-iot.ch";

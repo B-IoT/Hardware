@@ -3,7 +3,7 @@ enum states {MOVE, BTN, MOVE_AND_BTN, NOTHING};
 
 // We collect each device caracteristics and store them in BeaconData
 typedef struct {
-  char address[MAC_ADDRESS_LENGTH];  // mac address (67:f1:d2:04:cd:5d)
+  uint8_t address[MAC_ADDRESS_LENGTH];  // mac address (67:f1:d2:04:cd:5d)
   int rssi;
   int txPower;
   uint8_t batteryLevel = 0; // Beacon Battery
@@ -17,6 +17,7 @@ typedef struct {
 uint8_t bufferIndex = 0;  // Found devices counter
 BeaconData buffer[50];    // Buffer to store found devices data
 uint8_t whiteList[WHITELIST_LENGTH][MAC_ADDRESS_LENGTH]; // White list for the MAC
+int whiteListCount = 0; // Counter that keeps track of how many mac addresses are in the white list
 
 
 class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
@@ -38,7 +39,7 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
       uint8_t presentInWhiteList = 0;
       nb_detected = 0;
 
-      for (int j = 0; j < WHITELIST_LENGTH ; j++) {
+      for (int j = 0; j < whiteListCount ; j++) {
         uint8_t eq = 1;
         for (int k = 0; k < MAC_ADDRESS_LENGTH; k++) {
           if (whiteList[j][k] != receivedMac[k]) {
