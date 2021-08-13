@@ -1,13 +1,17 @@
+// Beacon states
+enum states {MOVE, BTN, MOVE_AND_BTN, NOTHING};
+
 // We collect each device caracteristics and store them in BeaconData
 typedef struct {
-  char id[25]; //Device Name
-  uint8_t address[MAC_ADDRESS_LENGTH]; // 67:f1:d2:04:cd:5d (mac address)
+  char address[MAC_ADDRESS_LENGTH];  // mac address (67:f1:d2:04:cd:5d)
   int rssi;
   int txPower;
-  uint8_t batteryLevel = 80; // Beacon Battery
-  int8_t temperature = 22;  // Beacon Temperature
-  uint8_t state = 0; // State of the beacon move
-  
+  uint8_t batteryLevel = 0; // Beacon Battery
+  int8_t temperature = 0;  // Beacon Temperature
+  uint8_t number = 0; // Indice of the beacon found
+  uint8_t timeSinceLastClick = 255; // Number of seconds since the last click on button (Saturation value)
+  uint8_t timeSinceLastMove = 255; // Number of seconds since the last movement (Saturation value)
+  uint8_t state = NOTHING; // State of the beacon
 } BeaconData;
 
 uint8_t bufferIndex = 0;  // Found devices counter
@@ -27,53 +31,68 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
 
       // First check that MAC Address is in the whitelist
       uint8_t receivedMac[MAC_ADDRESS_LENGTH];
+
+      uint8_t* payLoad = advertisedDevice.getPayload(); // Get the entire packet
       memcpy(receivedMac, advertisedDevice.getAddress().getNative(), MAC_ADDRESS_LENGTH);
 
       uint8_t presentInWhiteList = 0;
       nb_detected = 0;
 
       for (int j = 0; j < WHITELIST_LENGTH ; j++) {
-          uint8_t eq = 1;
-          for (int k = 0; k < MAC_ADDRESS_LENGTH; k++) {
-            if(whiteList[j][k] != receivedMac[k]) {
-              eq = 0;
-              break;
-            }
-          }
-          if(eq) {
-            presentInWhiteList = 1;
+        uint8_t eq = 1;
+        for (int k = 0; k < MAC_ADDRESS_LENGTH; k++) {
+          if (whiteList[j][k] != receivedMac[k]) {
+            eq = 0;
             break;
           }
-      }
-      
-      if(presentInWhiteList){
-        //Name
-        if (advertisedDevice.haveName()) {
-          strcpy (buffer[bufferIndex].id, advertisedDevice.getName().c_str());
         }
+        if (eq) {
+          presentInWhiteList = 1;
+          break;
+        }
+      }
+
+      if (presentInWhiteList) {
+        //Name
+
+        parsePayload(payLoad, bufferIndex);
+
         //RSSI
         if (advertisedDevice.haveRSSI()) {
           buffer[bufferIndex].rssi = advertisedDevice.getRSSI();
         } else {
           buffer[bufferIndex].rssi =  0;
         }
+
         //MAC Adresse
         memcpy(buffer[bufferIndex].address, receivedMac, MAC_ADDRESS_LENGTH);
-  
-        //TX Power
-        if (advertisedDevice.haveTXPower()) {
+
+        /*if (advertisedDevice.haveName()) {
+          strcpy (buffer[bufferIndex].id, advertisedDevice.getName().c_str());
+          }
+          //RSSI
+          if (advertisedDevice.haveRSSI()) {
+          buffer[bufferIndex].rssi = advertisedDevice.getRSSI();
+          } else {
+          buffer[bufferIndex].rssi =  0;
+          }
+          //MAC Adresse
+          memcpy(buffer[bufferIndex].address, receivedMac, MAC_ADDRESS_LENGTH);
+
+          //TX Power
+          if (advertisedDevice.haveTXPower()) {
           buffer[bufferIndex].txPower = advertisedDevice.getTXPower();
-        }
-  
-        //Debug Print
-        /*Serial.printf("name: %s \n", advertisedDevice.getName().c_str());
+          }
+
+          //Debug Print
+          /*Serial.printf("name: %s \n", advertisedDevice.getName().c_str());
           Serial.printf("MAC: %s \n", advertisedDevice.getAddress().toString().c_str());
           Serial.printf("Manufactuerer Data: %d \n", advertisedDevice.getManufacturerData());
           Serial.printf("RSSI: %d \n", advertisedDevice.getRSSI());
           Serial.printf("TX Power: %d \n", advertisedDevice.getTXPower());*/
         bufferIndex++;
       }
-      
+
     }
 };
 
@@ -93,21 +112,21 @@ void ScanBeacons() {
   whiteList[0][3] = 0xb3;
   whiteList[0][4] = 0x18;
   whiteList[0][5] = 0x6a;
-  
+
   whiteList[1][0] = 0xfc;
   whiteList[1][1] = 0x02;
   whiteList[1][2] = 0xa0;
   whiteList[1][3] = 0xfa;
   whiteList[1][4] = 0x33;
   whiteList[1][5] = 0x19;
-  
+
   whiteList[2][0] = 0xe3;
   whiteList[2][1] = 0x6f;
   whiteList[2][2] = 0x28;
   whiteList[2][3] = 0x36;
   whiteList[2][4] = 0x5a;
   whiteList[2][5] = 0xdb;
-  
+
   whiteList[3][0] = 0xf1;
   whiteList[3][1] = 0x96;
   whiteList[3][2] = 0xcd;
@@ -125,15 +144,13 @@ void ScanBeacons() {
   Serial.println(nb_detected);
   for (int i = 0; i < nb_detected; i++) {
 
-    Serial.print("Name: ");
-    Serial.println(buffer[i].id);
     Serial.print("Mac: ");
     Serial.printf("%02x:%02x:%02x:%02x:%02x:%02x", buffer[i].address[0], buffer[i].address[1], buffer[i].address[2], buffer[i].address[3], buffer[i].address[4], buffer[i].address[5]);
     Serial.print("RSSI: ");
     Serial.println(buffer[i].rssi);
     Serial.print("TX Power: ");
     Serial.println(buffer[i].txPower);
-     Serial.print("Batterie: ");
+    Serial.print("Batterie: ");
     Serial.println(buffer[i].batteryLevel);
     Serial.print("Temperature: ");
     Serial.println(buffer[i].temperature);
@@ -141,8 +158,10 @@ void ScanBeacons() {
     Serial.println(buffer[i].state);
     Serial.println("---------------------");
   }
-  bufferIndex = 0;
-  delay(500);
+
   Serial.println("\nScan done!\n");
+
+  bufferIndex = 0;
+  pBLEScan->clearResults();   // delete results fromBLEScan buffer to release memory
   delay(500);
 }
