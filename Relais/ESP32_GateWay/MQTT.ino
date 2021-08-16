@@ -11,6 +11,8 @@ void connect_MQTT() {
   Serial.print("Checking MQTT with company id: ");
   Serial.print(buffer);
 
+  client.setBufferSize(MQTT_BUFFER_SIZE_RECEIVE); // in char 6*2 * 1024 + 2*1024 (whitelist + 2*1024 for the rest to be sure)
+
   while (!client.connected()) {
     //if wifi deconnects after the first check
     if(WiFi.status() != WL_CONNECTED) {
@@ -51,16 +53,16 @@ void callback(char* topic, byte* message, unsigned int length) {
   Serial.println(topic);
   Serial.print(". Message: ");
 
-  //Char in which the received message is stored
-  char messageTemp[200];
 
   //Converting the receiveid message to char in Json format
   for (int i = 0; i < length; i++) {
     Serial.print((char)message[i]);
-    messageTemp[i] = (char)message[i];
+    mqttMessageTemp[i] = (char)message[i];
   }
+  Serial.println("");
+  
   //Deserialize the received Json
-  DeserializationError error = deserializeJson(doc, messageTemp);
+  DeserializationError error = deserializeJson(doc, mqttMessageTemp);
 
   //Printing error
   if (error) {

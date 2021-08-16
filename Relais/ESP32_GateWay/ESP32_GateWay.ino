@@ -22,6 +22,7 @@
 #define MAC_ADDRESS_STRING_LENGTH 18 // accounting for the null char
 #define MAC_ADDRESS_LENGTH 6
 #define WHITELIST_LENGTH 1024
+#define MQTT_BUFFER_SIZE_RECEIVE 14*1024 // in bytes: 6 * 2 * 1024 + 2 * 1024 (whitelist + 2*1024 for the rest to be sure)
 
 //WiFI parameters
 //const char* hardSSID = "IT_ELS";
@@ -36,6 +37,9 @@ const int mqttPort = 1883;
 const char* mqttUser = "testP1";
 const char* mqttPassword = "testP1";
 const char* relayID = "relay_P1";
+
+//Char in which the received message is stored
+char mqttMessageTemp[MQTT_BUFFER_SIZE_RECEIVE];
 
 //Wi-Fi parameters from MQTT
 int mqttFloor = 0;
