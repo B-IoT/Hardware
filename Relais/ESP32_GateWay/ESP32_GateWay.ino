@@ -23,6 +23,7 @@
 #define MAC_ADDRESS_LENGTH 6
 #define WHITELIST_LENGTH 1024
 #define MQTT_BUFFER_SIZE_RECEIVE 14*1024 // in bytes: 6 * 2 * 1024 + 2 * 1024 (whitelist + 2*1024 for the rest to be sure)
+#define MQTT_JSON_SIZE_RECEIVE 14*1024
 
 //WiFI parameters
 //const char* hardSSID = "IT_ELS";
@@ -40,6 +41,11 @@ const char* relayID = "relay_P1";
 
 //Char in which the received message is stored
 char mqttMessageTemp[MQTT_BUFFER_SIZE_RECEIVE];
+
+//WhiteList related variables
+uint8_t whiteList[WHITELIST_LENGTH][MAC_ADDRESS_LENGTH]; // White list for the MAC
+int whiteListCount = 0; // Counter that keeps track of how many mac addresses are in the white list
+
 
 //Wi-Fi parameters from MQTT
 int mqttFloor = 0;
@@ -65,7 +71,7 @@ const int intensiteOff = 4095;
 //Scan parameters
 int beaconScanTime = 2; //Scan time must be longer than beacon interval
 uint8_t nb_detected = 0; //Nb of beacons detected
-uint8_t maxBeaconToSend = 1; //Max nb of beacons to be sent at the same time to the MQTT
+uint8_t maxBeaconToSendInOnePacket = 1; //Max nb of beacons to be sent at the same time to the MQTT
 
 //Client name for the MQTT
 WiFiClient espclient;
@@ -141,6 +147,7 @@ void loop() {
   while(String(timeSec).toInt() % 3 != 0) {
      getLocalTime(&timeinfo);
      strftime(timeSec,3, "%S", &timeinfo);
+     delay(10);
      //Serial.println(timeSec);
   }
 

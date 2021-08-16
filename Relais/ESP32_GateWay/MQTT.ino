@@ -1,17 +1,17 @@
 void connect_MQTT() {
 
   //Creating the Json document to send
-  DynamicJsonDocument doc(500);
-  doc["company"] = "biot";
+  DynamicJsonDocument willDoc(250);
+  willDoc["company"] = "biot";
 
   //Sending the Json
   char buffer[400];
-  serializeJson(doc, buffer);
+  serializeJson(willDoc, buffer);
 
   Serial.print("Checking MQTT with company id: ");
-  Serial.print(buffer);
+  Serial.println(buffer);
 
-  client.setBufferSize(MQTT_BUFFER_SIZE_RECEIVE); // in char 6*2 * 1024 + 2*1024 (whitelist + 2*1024 for the rest to be sure)
+  client.setBufferSize(MQTT_BUFFER_SIZE_RECEIVE);
 
   while (!client.connected()) {
     //if wifi deconnects after the first check
@@ -45,7 +45,7 @@ void connect_MQTT() {
 
 void callback(char* topic, byte* message, unsigned int length) {
 
-  DynamicJsonDocument doc(500);
+  DynamicJsonDocument receiveDocJson(MQTT_JSON_SIZE_RECEIVE);
 
   //Prints for dev
   Serial.println("\n---------------\n");
@@ -62,7 +62,7 @@ void callback(char* topic, byte* message, unsigned int length) {
   Serial.println("");
   
   //Deserialize the received Json
-  DeserializationError error = deserializeJson(doc, mqttMessageTemp);
+  DeserializationError error = deserializeJson(receiveDocJson, mqttMessageTemp);
 
   //Printing error
   if (error) {
@@ -72,12 +72,12 @@ void callback(char* topic, byte* message, unsigned int length) {
   }
 
   //Updating the parameters
-  mqttFloor = doc["floor"];
-  mqttLatitude = doc["latitude"];
-  mqttLongitude = doc["longitude"];
-  mqttSSID = strdup(doc["wifi"]["ssid"]);
-  mqttPasswordWIFI = strdup(doc["wifi"]["password"]); 
-  char* whiteListString = strdup(doc["whiteList"]);
+  mqttFloor = receiveDocJson["floor"];
+  mqttLatitude = receiveDocJson["latitude"];
+  mqttLongitude = receiveDocJson["longitude"];
+  mqttSSID = strdup(receiveDocJson["wifi"]["ssid"]);
+  mqttPasswordWIFI = strdup(receiveDocJson["wifi"]["password"]); 
+  char* whiteListString = strdup(receiveDocJson["whiteList"]);
   
 
   // DEBUG 
@@ -85,7 +85,7 @@ void callback(char* topic, byte* message, unsigned int length) {
   Serial.println(whiteListString);
 
   updateWhiteList(whiteListString);
-  
+
 }
 
 void send_MQTT() {
@@ -96,7 +96,7 @@ void send_MQTT() {
   /*if (nb_detected > maxBeaconToSend) {
     uint8_t startIdx = 0; // Index of the first beacon to send
     uint8_t nbDocToCreate;*/
-    uint8_t startIdx = 0;
+    int startIdx = 0;
     uint8_t nbDocToCreate = nb_detected;
     // Compute number of doc to create to send all beacons
     /*if ((nb_detected % maxBeaconToSend) == 0) {
@@ -106,11 +106,11 @@ void send_MQTT() {
       nbDocToCreate = nb_detected / maxBeaconToSend + 1; //Number of document required to send all beacons
     }*/
     
-    for (uint8_t j = 0; j < nbDocToCreate; j++) {
-      uint8_t endIdx = startIdx + maxBeaconToSend; //Index of the last beacon to send 
+    for (int j = 0; j < nbDocToCreate; j++) {
+      int endIdx = startIdx + maxBeaconToSendInOnePacket; //Index of the last beacon to send 
       
       //Creating the Json document to send
-      DynamicJsonDocument doc(600);  //TO INCREASE
+      DynamicJsonDocument doc(1024);  //TO INCREASE
       doc["relayID"] = relayID; //Title of the Json head is the relayID
 
       //Sanity condition to avoid blank data
@@ -124,7 +124,7 @@ void send_MQTT() {
       
       //Fill and send the JSON
       send_JSON(doc, startIdx, endIdx);
-      startIdx += maxBeaconToSend; 
+      startIdx += maxBeaconToSendInOnePacket; 
     }
   /*} else {
  
@@ -146,7 +146,7 @@ void send_JSON(DynamicJsonDocument doc, uint8_t idxStart, uint8_t idxEnd) {
   JsonArray beacons = doc.createNestedArray("beacons"); // Beacon array to send
   
   // Write Beacon data to send
-  for (uint8_t i = idxStart; i < idxEnd; i++) {
+  for (int i = idxStart; i < idxEnd; i++) {
     DynamicJsonDocument beaconDoc(100); // Json size for on beacon = 78 (measured)
 
     char macAddressString[18];
@@ -163,16 +163,16 @@ void send_JSON(DynamicJsonDocument doc, uint8_t idxStart, uint8_t idxEnd) {
     doc["floor"] = mqttFloor;
   
     //Sending the Json
-    char buffer[600];
+    char sendJsonBuffer[600];
     //Serial.println("Bonjour serial");
-    serializeJson(doc, buffer);
+    serializeJson(doc, sendJsonBuffer);
     //JSON size for dev
     /*size_t jsonSize =  measureJson(doc);//measure number of caracters inside the json serialized
     Serial.print("JSON SIZE = ");
     Serial.println(jsonSize);*/
     
-    client.publish("incoming.update", buffer);
-    Serial.println(buffer);
+    client.publish("incoming.update", sendJsonBuffer);
+    Serial.println(sendJsonBuffer);
     Serial.println("Sent Json on incoming.update");
     Serial.println("\n---------------------");
 }
@@ -186,9 +186,11 @@ void send_JSON(DynamicJsonDocument doc, uint8_t idxStart, uint8_t idxEnd) {
   *
   **/
 int updateWhiteList(char* whiteListString) {
+    whiteListCount = 0;
     uint8_t validMac = 1;
+    uint8_t outMac[MAC_ADDRESS_LENGTH];
     for(int i = 0; i < WHITELIST_LENGTH; i++) {
-        uint8_t outMac[MAC_ADDRESS_LENGTH];
+        
         if(whiteListString[i*MAC_ADDRESS_LENGTH*2] == '\0'){
             // End of the string, go out of the loop
             break;
@@ -210,9 +212,7 @@ int updateWhiteList(char* whiteListString) {
         for(int k = 0; k < MAC_ADDRESS_LENGTH; k++){
             whiteList[i][k] = outMac[k];
         }
-        whiteListCount = whiteListCount + 1;
-        
-       
+        whiteListCount = whiteListCount + 1;  
     }
 
     // Put 0's in all next white listed MAC addresses
@@ -221,9 +221,13 @@ int updateWhiteList(char* whiteListString) {
             whiteList[i][k] = 0;
         }
     }
-    // for(int i = 0; i < WHITELIST_LENGTH; i++) {
-    //     printf("%02x:%02x:%02x:%02x:%02x:%02x\n", whiteList[i][0], whiteList[i][1], whiteList[i][2], whiteList[i][3], whiteList[i][4], whiteList[i][5]);
-    // }
+
+    Serial.print("Updated whiteList: whiteListCount = ");
+    Serial.printf("%d\n", whiteListCount);
+    /*Serial.println("White list is:");
+     for(int i = 0; i < WHITELIST_LENGTH; i++) {
+         printf("%02x:%02x:%02x:%02x:%02x:%02x\n", whiteList[i][0], whiteList[i][1], whiteList[i][2], whiteList[i][3], whiteList[i][4], whiteList[i][5]);
+     }*/
     return 0;
 }
 
