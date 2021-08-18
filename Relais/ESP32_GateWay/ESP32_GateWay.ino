@@ -1,6 +1,6 @@
-/*Version: V1.2 CHUV demo the most stable version to test location engine
+/*Version: V3 With temperature, battery and status. Uses Whitelist to check mmac addresses of beacons
  * Caractéristics: 
- * Treatment beacon: V1
+ * Treatment beacon: V3
  * ESP synchronization: YES                  
  * JSON: 1 by 1
  */
