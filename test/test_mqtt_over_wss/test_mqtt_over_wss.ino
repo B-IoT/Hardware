@@ -28,6 +28,7 @@
 
 #define MQTT_JSON_SIZE_RECEIVE 14*1024
 
+
 //WiFI parameters
 //const char* hardSSID = "IT_ELS";
 //const char* hardPassword = "BLIs0urce19";
@@ -36,7 +37,7 @@ const char* hardSSID = "iPhone de Samuel";
 const char* hardPassword = "12345678";
 
 //MQTT Parameters
-const char* mqttServerUri = "wss://test.mosquitto.org:8081/mqtt";
+const char* mqttServerUri = "mqtt://mqtt.b-iot.ch:1883";
 const char* mqttUser = "testP1";
 const char* mqttPassword = "testP1";
 const char* relayID = "relay_P1";
@@ -114,7 +115,8 @@ void setup() { //Setup - 10s
   //Begin MQTT
   
   esp_log_level_set("MQTT_CLIENT", ESP_LOG_VERBOSE);
-  
+
+
   /*client.setServer(mqttServer, mqttPort);
   client.setCallback(callback);   */
   init_MQTT();
