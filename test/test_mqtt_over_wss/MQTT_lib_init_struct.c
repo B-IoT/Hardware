@@ -13,6 +13,7 @@ esp_mqtt_client_config_t init_esp_mqtt_client_config(const char* serverUri, cons
         .lwt_msg = lastWillBuffer,
         .lwt_msg_len = lastWillBufferLength,
         .cert_pem = (const char *)cert,
+        .reconnect_timeout_ms = 2000,
     };
   return mqtt_cfg;
 }

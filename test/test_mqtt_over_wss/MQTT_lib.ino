@@ -55,7 +55,7 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
 
     case MQTT_EVENT_SUBSCRIBED:
         Serial.printf("MQTT subscribed to TOPIC=%.*s\r\n", event->topic, event->topic_len, event->topic);
-        //msg_id = esp_mqtt_client_publish(client, "update.parameters", "data", 0, 0, 0);
+        msg_id = esp_mqtt_client_publish(client, "update.parameters", "{\"test\": \"msg\"}", 0, 0, 0);
         break;
     case MQTT_EVENT_UNSUBSCRIBED:
     Serial.printf("MQTT UNsubscribed to TOPIC=%.*s\r\n", event->topic_len, event->topic);
