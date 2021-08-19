@@ -28,7 +28,7 @@ extern "C" {
 #endif
 
 
-esp_mqtt_client_config_t init_esp_mqtt_client_config(const char* uri, const char * username, const char * password, const char* lastWillBuffer, int lastWillBufferLength, const char* cert);
+esp_mqtt_client_config_t init_esp_mqtt_client_config(const char* clientId, const char* serverUri, const char * username, const char * password, const char* lastWillBuffer, int lastWillBufferLength, const char* cert);
 
 #ifdef __cplusplus
 } // extern "C"

@@ -37,7 +37,7 @@ const char* hardSSID = "iPhone de Samuel";
 const char* hardPassword = "12345678";
 
 //MQTT Parameters
-const char* mqttServerUri = "mqtt://test.mosquitto.org:1883";
+const char* mqttServerUri = "ws://mqtt.b-iot.ch:443/mqtt";
 const char* mqttUser = "testP1";
 const char* mqttPassword = "testP1";
 const char* relayID = "relay_P1";

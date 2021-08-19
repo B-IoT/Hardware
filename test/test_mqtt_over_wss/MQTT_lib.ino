@@ -77,13 +77,13 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
 }
 
 static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data)
-{
+{ 
     /* The argument passed to esp_mqtt_client_register_event can de accessed as handler_args*/
     mqtt_event_handler_cb((esp_mqtt_event_handle_t)event_data);
 }
 
 static void mqtt_init_client(const char* lastWillBuffer, int lastWillBufferLength){  
-   const esp_mqtt_client_config_t mqtt_cfg = init_esp_mqtt_client_config(mqttServerUri, mqttUser, mqttPassword, lastWillBuffer, lastWillBufferLength, certificate);
+   const esp_mqtt_client_config_t mqtt_cfg = init_esp_mqtt_client_config(relayID, mqttServerUri, mqttUser, mqttPassword, lastWillBuffer, lastWillBufferLength, certificate);
 
     esp_mqtt_client_handle_t client = esp_mqtt_client_init(&mqtt_cfg);
     Serial.printf("MQTT client initialized");

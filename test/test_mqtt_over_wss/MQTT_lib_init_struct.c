@@ -3,8 +3,9 @@
 
 
 
-esp_mqtt_client_config_t init_esp_mqtt_client_config(const char* serverUri, const char * username, const char * password, const char* lastWillBuffer, int lastWillBufferLength, const char* cert) {
+esp_mqtt_client_config_t init_esp_mqtt_client_config(const char* clientId, const char* serverUri, const char * username, const char * password, const char* lastWillBuffer, int lastWillBufferLength, const char* cert) {
   const esp_mqtt_client_config_t mqtt_cfg = {
+        .client_id = clientId,
         .uri = serverUri,
         .buffer_size = MQTT_BUFFER_SIZE_RECEIVE,
         .username = username,
