@@ -1,27 +1,27 @@
-void ledBlueOn(){
+void ledBlueOn() {
   ledcWrite(ledChannelBlue, intensiteOn); //Led OFF
   ledcWrite(ledChannelGreen, intensiteOff); //Led ON
   ledcWrite(ledChannelRed, intensiteOff); //Led ON
 }
 
-void ledGreenOn(){
+void ledGreenOn() {
   ledcWrite(ledChannelBlue, intensiteOff); //Led OFF
   ledcWrite(ledChannelGreen, intensiteOn); //Led ON
   ledcWrite(ledChannelRed, intensiteOff); //Led ON
 }
 
-void ledTurquoiseOn(){
+void ledTurquoiseOn() {
   ledcWrite(ledChannelBlue, intensiteOn); //Led OFF
   ledcWrite(ledChannelGreen, intensiteOn); //Led ON
   ledcWrite(ledChannelRed, intensiteOff); //Led ON
 }
 
-void ledRedOn(){
+void ledRedOn() {
   ledcWrite(ledChannelBlue, intensiteOff); //Led OFF
   ledcWrite(ledChannelGreen, intensiteOff); //Led ON
   ledcWrite(ledChannelRed, intensiteOn); //Led ON
 }
-void ledOff(){
+void ledOff() {
   ledcWrite(ledChannelBlue, intensiteOff); //Led OFF
   ledcWrite(ledChannelGreen, intensiteOff); //Led ON
   ledcWrite(ledChannelRed, intensiteOff); //Led ON

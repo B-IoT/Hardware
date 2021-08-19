@@ -1,15 +1,14 @@
 /*Version: V1.2 CHUV demo the most stable version to test location engine
- * Caractéristics: 
- * Treatment beacon: V1
- * ESP synchronization: YES                  
- * JSON: 1 by 1
- */
- 
+   Caractéristics:
+   Treatment beacon: V1
+   ESP synchronization: YES
+   JSON: 1 by 1
+*/
+
 
 //Librairies
 #include <ArduinoJson.h>
 #include <WiFi.h>
-#include <PubSubClient.h>
 #include "time.h"
 
 //Bluetooth librairies
@@ -19,73 +18,46 @@
 #include <BLEAdvertisedDevice.h>
 #include <BLEBeacon.h>
 
-//WiFI parameters
-const char* hardSSID = "IT_ELS";
-const char* hardPassword = "BLIs0urce19";
+#include "MQTT_lib_init_struct.h"
 
-//MQTT Parameters
-const char* mqttServer = "mqtt.b-iot.ch";
-const int mqttPort = 1883;
-const char* mqttUser = "testP1";
-const char* mqttPassword = "testP1";
-const char* relayID = "relay_P1";
-
-//Wi-Fi parameters from MQTT
-int mqttFloor = 0;
-float mqttLatitude = 0;
-float mqttLongitude = 0;
-char* mqttSSID;
-const char* mqttPasswordWIFI;
-
-//Led parameters
-const int ledGreen = 22;
-const int ledBlue = 23;
-const int ledRed = 3;
-const int ledPlus = 1;
-
-const int freq = 5000;
-const int ledChannelGreen = 0;
-const int ledChannelBlue = 1;
-const int ledChannelRed = 0;
-const int resolution = 12; 
-const int intensiteOn = 3850;
-const int intensiteOff = 4095;
-
-//Scan parameters
-int beaconScanTime = 2; //Scan time must be longer than beacon interval
-uint8_t nb_detected = 0; //Nb of beacons detected
-uint8_t maxBeaconToSend = 1; //Max nb of beacons to be sent at the same time to the MQTT
-
-//Client name for the MQTT
-WiFiClient espclient;
-PubSubClient client(espclient);
+#include "variables.h"
 
 void setup() { //Setup - 10s
- 
+
   //Set up the LED pin - TBM into RGB
   pinMode (ledGreen, OUTPUT);
   pinMode (ledPlus, OUTPUT);
   pinMode (ledRed, OUTPUT);
-  pinMode (ledBlue, OUTPUT);  
-  
+  pinMode (ledBlue, OUTPUT);
+
   digitalWrite (ledGreen, HIGH);  // turn off the LED
   digitalWrite (ledRed, HIGH);  // turn off the LED
-  digitalWrite (ledBlue, HIGH);  // turn off the LED 
+  digitalWrite (ledBlue, HIGH);  // turn off the LED
   digitalWrite (ledPlus, HIGH);  // turn off the LED
-  
+
   ledcSetup(ledChannelGreen, freq, resolution);
   ledcSetup(ledChannelBlue, freq, resolution);
   ledcSetup(ledChannelRed, freq, resolution);
-  
+
   ledcAttachPin(ledGreen, ledChannelGreen);
   ledcAttachPin(ledBlue, ledChannelBlue);
   ledcAttachPin(ledRed, ledChannelRed);
-  
+
   ledGreenOn();
-  
+
   //Begin Serial
   Serial.begin(115200);
-  delay(250);  
+  delay(250);
+  Serial.println("Begin relay setup");
+  Serial.println("BEGIN hardcoded information---------------------------------------------");
+  Serial.printf("Relay with the ID: %s\n", relayID);
+  Serial.printf("company: %s\n", company);
+  Serial.printf("mqttUser: %s\n", mqttUser);
+  Serial.printf("mqttPassword: %s\n", mqttPassword);
+  Serial.printf("hardcoded ssid: %s\n", hardSSID);
+  Serial.printf("hardcoded password: %s\n", hardPassword);
+  Serial.printf("ServerUri: %s\n", mqttServerUri);
+  Serial.println("END hardcoded information---------------------------------------------");
 
   //Begin Wifi
   WiFi.begin(hardSSID, hardPassword);
@@ -95,31 +67,31 @@ void setup() { //Setup - 10s
   GetTime();
   delay(250);
 
-  //Begin bluetooth  
+  //Begin bluetooth
   BLEDevice::init("");
   delay(250);
 
   //Begin MQTT
-  client.setServer(mqttServer, mqttPort);
-  client.setCallback(callback);   
+  init_and_connect_MQTT();
+
 }
 
 void loop() {
-   
+
   struct tm timeinfo;
-    
-   //Checking Wifi
-  if(WiFi.status() != WL_CONNECTED) {
+
+  //Checking Wifi
+  if (WiFi.status() != WL_CONNECTED) {
     connect_wifi();
   }
 
   //Checking MQTT if Wifi connected
-  if(WiFi.status() == WL_CONNECTED && !client.connected()) {
-    connect_MQTT(); 
-  }
-  
+  /*if(WiFi.status() == WL_CONNECTED && !client.connected()) {
+    connect_MQTT();
+    }*/
+
   //Looks for MQTT messages to read (params to update)
-  client.loop();
+  //client.loop();
 
   //Scan the beacons around
   ScanBeacons();
@@ -127,10 +99,11 @@ void loop() {
   char timeSec[3];
   strftime(timeSec, 3, "%S", &timeinfo);
 
-  while(String(timeSec).toInt() % 3 != 0) {
-     getLocalTime(&timeinfo);
-     strftime(timeSec,3, "%S", &timeinfo);
-     //Serial.println(timeSec);
+  while (String(timeSec).toInt() % 3 != 0) {
+    getLocalTime(&timeinfo);
+    strftime(timeSec, 3, "%S", &timeinfo);
+    delay(10);
+    //Serial.println(timeSec);
   }
 
   //Send to MQTT after the first update
