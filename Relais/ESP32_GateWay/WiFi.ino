@@ -9,9 +9,6 @@ void connect_wifi() {
   
   while (WiFi.status() != WL_CONNECTED) { //Keeps trying to connect until it's ok
 
-    /**
-    Serial.println("scan start");
-
     int n = WiFi.scanComplete();
       if (n == -2) {
         Serial.println("->enter to scanning function");
@@ -22,7 +19,7 @@ void connect_wifi() {
       else if (n == -1) {
         delay(100);
       }
-      else if (n > 0) {
+      /*else if (n > 0) {
         for (int i = 0; i <= n; i++) {
           Serial.print(i);
           Serial.print(")");
@@ -31,9 +28,8 @@ void connect_wifi() {
         WiFi.scanDelete();
         Serial.println("->scanning deleted");
       }
-
-    delay(5000);
-    */
+      */
+      delay(1000);
   
     Serial.print(".");
     WiFi.begin(hardSSID, hardPassword);
