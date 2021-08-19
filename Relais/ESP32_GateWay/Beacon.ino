@@ -28,7 +28,7 @@ void parsePayload(uint8_t* packetToParse, uint8_t bufferIndex) {
    idx: Index of the beacon to store the data
 */
 /*
-void getRSSIBeacon(BLEAdvertisedDevice advertisedDevice, int idx) {
+  void getRSSIBeacon(BLEAdvertisedDevice advertisedDevice, int idx) {
 
   if (advertisedDevice.haveRSSI()) {
     buffer[idx].rssi = advertisedDevice.getRSSI();
@@ -36,5 +36,5 @@ void getRSSIBeacon(BLEAdvertisedDevice advertisedDevice, int idx) {
   else {
     buffer[idx].rssi =  0;
   }
-}
+  }
 */

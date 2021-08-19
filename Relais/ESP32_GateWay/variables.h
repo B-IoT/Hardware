@@ -5,17 +5,15 @@
 
 
 //WiFI parameters
-//const char* hardSSID = "IT_ELS";
-//const char* hardPassword = "BLIs0urce19";
+const char* hardSSID = "Wifi-HJU";
+const char* hardPassword = "TX-3FqtA1_Cr$nTk";
 
-const char* hardSSID = "iPhone de Samuel";
-const char* hardPassword = "12345678";
 
 //MQTT Parameters
 const char* mqttServerUri = "ws://mqtt.b-iot.ch:443/mqtt";
-const char* mqttUser = "testP1";
-const char* mqttPassword = "testP1";
-const char* relayID = "relay_P1";
+const char* mqttUser = "test1";
+const char* mqttPassword = "test1";
+const char* relayID = "relay_1";
 
 //WhiteList related variables
 uint8_t whiteList[WHITELIST_LENGTH][MAC_ADDRESS_LENGTH]; // White list for the MAC
@@ -39,7 +37,7 @@ const int freq = 5000;
 const int ledChannelGreen = 0;
 const int ledChannelBlue = 1;
 const int ledChannelRed = 0;
-const int resolution = 12; 
+const int resolution = 12;
 const int intensiteOn = 3850;
 const int intensiteOff = 4095;
 

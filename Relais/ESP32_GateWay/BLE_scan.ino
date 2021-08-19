@@ -34,7 +34,7 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
       if (presentInWhiteList) {
         // Check that we did not receive it already
         uint8_t received = 0;
-        for(int i = 0; i < bufferIndex; i++) {
+        for (int i = 0; i < bufferIndex; i++) {
           uint8_t eq = 1;
           for (int k = 0; k < MAC_ADDRESS_LENGTH; k++) {
             if (buffer[i].address[k] != receivedMac[k]) {
@@ -48,19 +48,19 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
           }
         }
 
-        if(!received){
+        if (!received) {
           parsePayload(payLoad, bufferIndex);
-  
+
           //RSSI
           if (advertisedDevice.haveRSSI()) {
             buffer[bufferIndex].rssi = advertisedDevice.getRSSI();
           } else {
             buffer[bufferIndex].rssi =  0;
           }
-  
+
           //MAC Adresse
           memcpy(buffer[bufferIndex].address, receivedMac, MAC_ADDRESS_LENGTH);
-  
+
           /*if (advertisedDevice.haveName()) {
             strcpy (buffer[bufferIndex].id, advertisedDevice.getName().c_str());
             }
@@ -72,12 +72,12 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
             }
             //MAC Adresse
             memcpy(buffer[bufferIndex].address, receivedMac, MAC_ADDRESS_LENGTH);
-  
+
             //TX Power
             if (advertisedDevice.haveTXPower()) {
             buffer[bufferIndex].txPower = advertisedDevice.getTXPower();
             }
-  
+
             //Debug Print
             /*Serial.printf("name: %s \n", advertisedDevice.getName().c_str());
             Serial.printf("MAC: %s \n", advertisedDevice.getAddress().toString().c_str());
