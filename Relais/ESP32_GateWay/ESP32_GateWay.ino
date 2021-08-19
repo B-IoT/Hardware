@@ -51,6 +51,7 @@ void setup() { //Setup - 10s
   Serial.println("Begin relay setup");
   Serial.println("BEGIN hardcoded information---------------------------------------------");
   Serial.printf("Relay with the ID: %s\n", relayID);
+  Serial.printf("company: %s\n", company);
   Serial.printf("mqttUser: %s\n", mqttUser);
   Serial.printf("mqttPassword: %s\n", mqttPassword);
   Serial.printf("hardcoded ssid: %s\n", hardSSID);

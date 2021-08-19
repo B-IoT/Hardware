@@ -7,9 +7,8 @@
 //BEGIN PARAMETERS to change when flashing for a company --------------------------------------------------------------
 
 //WiFI parameters
-//const char* hardSSID = "Wifi-HJU";
-//const char* hardPassword = "TX-3FqtA1_Cr$nTk";
-
+const char* hardSSID = "Wifi-HJU";
+const char* hardPassword = "TX-3FqtA1_Cr$nTk";
 
 //MQTT Parameters
 const char* mqttServerUri = "ws://mqtt.b-iot.ch:443/mqtt";
