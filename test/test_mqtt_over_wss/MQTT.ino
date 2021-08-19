@@ -1,3 +1,5 @@
+#include "MQTT_lib.cpp"
+
 void init_MQTT() {
   Serial.println("Enter initt_MQTT()");
   
@@ -12,11 +14,11 @@ void init_MQTT() {
   Serial.print("lastWill message length: ");
   Serial.println((int)lastWillBufferSize);
 
-  mqtt_init_client(buffer, (int)lastWillBufferSize);
+  mqtt_init_client(relayID, mqttServerUri, mqttUser, mqttPassword, buffer, (int)lastWillBufferSize, &callback);
 }
 
-void callback(char* topic, byte* message, unsigned int length) {
-
+void callback(const char* message, const int msgLength, const char* topic, const int topicLength) {
+  Serial.println("Bonjour");
 }
 
 void send_MQTT() {
