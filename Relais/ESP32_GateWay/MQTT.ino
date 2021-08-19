@@ -1,17 +1,21 @@
-void connect_MQTT() {
+void init_and_connect_MQTT() {
 
   //Creating the Json document to send
   DynamicJsonDocument willDoc(250);
   willDoc["company"] = "biot";
 
   //Sending the Json
-  char buffer[400];
-  serializeJson(willDoc, buffer);
+  char lastWillBuffer[400];
+  int lastWillLength = serializeJson(willDoc, lastWillBuffer);
 
   Serial.print("Checking MQTT with company id: ");
-  Serial.println(buffer);
+  Serial.println(lastWillBuffer);
 
-  client.setBufferSize(MQTT_BUFFER_SIZE_RECEIVE);
+  mqtt_init_client(relayID, mqttServerUri, mqttUser, mqttPassword, lastWillBuffer, lastWillLength);
+
+  
+  
+  /*client.setBufferSize(MQTT_BUFFER_SIZE_RECEIVE);
 
   while (!client.connected()) {
     //if wifi deconnects after the first check
@@ -41,9 +45,15 @@ void connect_MQTT() {
       delay(500);
     }
   }
+  */
 }
 
-void callback(char* topic, byte* message, unsigned int length) {
+void callbackConnected(){
+  Serial.println("MQTT connected to the server, subscribing to the topic");
+  mqtt_subscribe("update.parameters");
+}
+
+void callbackIncomingMsg(char* topic, int topicLength, char* message, int messageLength) {
 
   DynamicJsonDocument receiveDocJson(MQTT_JSON_SIZE_RECEIVE);
 
@@ -54,15 +64,14 @@ void callback(char* topic, byte* message, unsigned int length) {
   Serial.print(". Message: ");
 
 
-  //Converting the receiveid message to char in Json format
-  for (int i = 0; i < length; i++) {
+  //Print incoming message
+  for (int i = 0; i < messageLength; i++) {
     Serial.print((char)message[i]);
-    mqttMessageTemp[i] = (char)message[i];
   }
   Serial.println("");
   
   //Deserialize the received Json
-  DeserializationError error = deserializeJson(receiveDocJson, mqttMessageTemp);
+  DeserializationError error = deserializeJson(receiveDocJson, message);
 
   //Printing error
   if (error) {
@@ -91,21 +100,9 @@ void callback(char* topic, byte* message, unsigned int length) {
 void send_MQTT() {
   
   //Parse the JSON condition 
-  /*NOTE: JSON is sending one by one because of a problem occuring from the reception on the backend */
-  /*Code in comments allows to send 3 by 3 */
-  /*if (nb_detected > maxBeaconToSend) {
-    uint8_t startIdx = 0; // Index of the first beacon to send
-    uint8_t nbDocToCreate;*/
     int startIdx = 0;
     uint8_t nbDocToCreate = nb_detected;
     // Compute number of doc to create to send all beacons
-    /*if ((nb_detected % maxBeaconToSend) == 0) {
-      nbDocToCreate = nb_detected / maxBeaconToSend; //Number of document required to send all beacons
-    }
-    else {
-      nbDocToCreate = nb_detected / maxBeaconToSend + 1; //Number of document required to send all beacons
-    }*/
-    
     for (int j = 0; j < nbDocToCreate; j++) {
       int endIdx = startIdx + maxBeaconToSendInOnePacket; //Index of the last beacon to send 
       
@@ -119,21 +116,11 @@ void send_MQTT() {
       }
       
       //Serial print for dev
-      /*Serial.printf("startIdx = %d \n",startIdx);
-      Serial.printf("endix = %d \n",endIdx);*/
       
       //Fill and send the JSON
       send_JSON(doc, startIdx, endIdx);
       startIdx += maxBeaconToSendInOnePacket; 
     }
-  /*} else {
- 
-    //Creating the Json document to send
-    DynamicJsonDocument doc(600);//TO INCREASE
-    doc["relayID"] = relayID; //title of the Json head is the relayID
-    //Fill and send the JSON
-    send_JSON(doc, 0, nb_detected);
-  }*/
 }
 
 //Goal: Fill the doc and send the JSON doc to the mqtt
@@ -171,7 +158,8 @@ void send_JSON(DynamicJsonDocument doc, uint8_t idxStart, uint8_t idxEnd) {
     Serial.print("JSON SIZE = ");
     Serial.println(jsonSize);*/
     
-    client.publish("incoming.update", sendJsonBuffer);
+    //client.publish("incoming.update", sendJsonBuffer);
+    mqtt_publish("incoming.update", sendJsonBuffer);
     Serial.println(sendJsonBuffer);
     Serial.println("Sent Json on incoming.update");
     Serial.println("\n---------------------");

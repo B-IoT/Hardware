@@ -1,24 +1,3 @@
-// Beacon states
-enum states {MOVE, BTN, MOVE_AND_BTN, NOTHING};
-
-// We collect each device caracteristics and store them in BeaconData
-typedef struct {
-  uint8_t address[MAC_ADDRESS_LENGTH];  // mac address (67:f1:d2:04:cd:5d)
-  int rssi;
-  int txPower;
-  uint8_t batteryLevel = 0; // Beacon Battery
-  int8_t temperature = 0;  // Beacon Temperature
-  uint8_t number = 0; // Indice of the beacon found
-  uint8_t timeSinceLastClick = 255; // Number of seconds since the last click on button (Saturation value)
-  uint8_t timeSinceLastMove = 255; // Number of seconds since the last movement (Saturation value)
-  uint8_t state = NOTHING; // State of the beacon
-} BeaconData;
-
-uint8_t bufferIndex = 0;  // Found devices counter
-BeaconData buffer[50];    // Buffer to store found devices data
-
-
-
 class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
   public:
     void onResult(BLEAdvertisedDevice advertisedDevice) {

@@ -9,7 +9,6 @@
 //Librairies
 #include <ArduinoJson.h>
 #include <WiFi.h>
-#include <PubSubClient.h>
 #include "time.h"
 
 //Bluetooth librairies
@@ -19,63 +18,9 @@
 #include <BLEAdvertisedDevice.h>
 #include <BLEBeacon.h>
 
-#define MAC_ADDRESS_STRING_LENGTH 18 // accounting for the null char
-#define MAC_ADDRESS_LENGTH 6
-#define WHITELIST_LENGTH 1024
-#define MQTT_BUFFER_SIZE_RECEIVE 14*1024 // in bytes: 6 * 2 * 1024 + 2 * 1024 (whitelist + 2*1024 for the rest to be sure)
-#define MQTT_JSON_SIZE_RECEIVE 14*1024
+#include "MQTT_lib_init_struct.h"
 
-//WiFI parameters
-//const char* hardSSID = "IT_ELS";
-//const char* hardPassword = "BLIs0urce19";
-
-const char* hardSSID = "iPhone de Samuel";
-const char* hardPassword = "12345678";
-
-//MQTT Parameters
-const char* mqttServer = "mqtt.b-iot.ch";
-const int mqttPort = 1883;
-const char* mqttUser = "testP1";
-const char* mqttPassword = "testP1";
-const char* relayID = "relay_P1";
-
-//Char in which the received message is stored
-char mqttMessageTemp[MQTT_BUFFER_SIZE_RECEIVE];
-
-//WhiteList related variables
-uint8_t whiteList[WHITELIST_LENGTH][MAC_ADDRESS_LENGTH]; // White list for the MAC
-int whiteListCount = 0; // Counter that keeps track of how many mac addresses are in the white list
-
-
-//Wi-Fi parameters from MQTT
-int mqttFloor = 0;
-float mqttLatitude = 0;
-float mqttLongitude = 0;
-char* mqttSSID;
-const char* mqttPasswordWIFI;
-
-//Led parameters
-const int ledGreen = 22;
-const int ledBlue = 23;
-const int ledRed = 3;
-const int ledPlus = 1;
-
-const int freq = 5000;
-const int ledChannelGreen = 0;
-const int ledChannelBlue = 1;
-const int ledChannelRed = 0;
-const int resolution = 12; 
-const int intensiteOn = 3850;
-const int intensiteOff = 4095;
-
-//Scan parameters
-int beaconScanTime = 2; //Scan time must be longer than beacon interval
-uint8_t nb_detected = 0; //Nb of beacons detected
-uint8_t maxBeaconToSendInOnePacket = 1; //Max nb of beacons to be sent at the same time to the MQTT
-
-//Client name for the MQTT
-WiFiClient espclient;
-PubSubClient client(espclient);
+#include "variables.h"
 
 void setup() { //Setup - 10s
  
@@ -117,8 +62,8 @@ void setup() { //Setup - 10s
   delay(250);
 
   //Begin MQTT
-  client.setServer(mqttServer, mqttPort);
-  client.setCallback(callback);   
+  init_and_connect_MQTT();
+
 }
 
 void loop() {
@@ -131,12 +76,12 @@ void loop() {
   }
 
   //Checking MQTT if Wifi connected
-  if(WiFi.status() == WL_CONNECTED && !client.connected()) {
+  /*if(WiFi.status() == WL_CONNECTED && !client.connected()) {
     connect_MQTT(); 
-  }
+  }*/
   
   //Looks for MQTT messages to read (params to update)
-  client.loop();
+  //client.loop();
 
   //Scan the beacons around
   ScanBeacons();
