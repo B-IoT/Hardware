@@ -2,7 +2,7 @@ void init_and_connect_MQTT() {
 
   //Creating the Json document to send
   DynamicJsonDocument willDoc(250);
-  willDoc["company"] = "biot";
+  willDoc["company"] = company;
 
   //Sending the Json
   char lastWillBuffer[400];
@@ -12,57 +12,16 @@ void init_and_connect_MQTT() {
   Serial.println(lastWillBuffer);
 
   mqtt_init_client(relayID, mqttServerUri, mqttUser, mqttPassword, lastWillBuffer, lastWillLength);
-
-
-
-  /*client.setBufferSize(MQTT_BUFFER_SIZE_RECEIVE);
-
-    while (!client.connected()) {
-    //if wifi deconnects after the first check
-    if(WiFi.status() != WL_CONNECTED) {
-          Serial.println("Wifi exit ...");
-          break;
-        }
-
-    // Attempt to connect
-    Serial.print("Connecting to ");
-    Serial.println(mqttServer);
-    ledBlueOn();
-
-    delay(500);
-    if (client.connect(relayID, mqttUser, mqttPassword, "will", 1, false, buffer)) {
-      // Subscribe to channel
-      Serial.print("update.parameters state : ");
-      Serial.println(client.subscribe("update.parameters"));
-     Serial.println(" Connected! - Subscribed to each channels");
-      ledBlueOn();
-    } else {
-      //if cannot connect
-      Serial.print(" errorCode= ");
-      Serial.println(client.state());
-      // Wait 5 seconds before retrying
-      ledTurquoiseOn();
-      delay(500);
-    }
-    }
-  */
 }
 
 void callbackConnected() {
   Serial.println("MQTT connected to the server, subscribing to the topic");
-  mqtt_subscribe("update.parameters");
+  mqtt_lib_subscribe("update.parameters");
 }
 
 void callbackIncomingMsg(char* topic, int topicLength, char* message, int messageLength) {
 
   DynamicJsonDocument receiveDocJson(MQTT_JSON_SIZE_RECEIVE);
-
-  //Prints for dev
-  Serial.println("\n---------------\n");
-  Serial.print("Message arrived on topic: ");
-  Serial.println(topic);
-  Serial.print(". Message: ");
-
 
   //Print incoming message
   for (int i = 0; i < messageLength; i++) {
@@ -159,7 +118,7 @@ void send_JSON(DynamicJsonDocument doc, uint8_t idxStart, uint8_t idxEnd) {
     Serial.println(jsonSize);*/
 
   //client.publish("incoming.update", sendJsonBuffer);
-  mqtt_publish("incoming.update", sendJsonBuffer);
+  mqtt_lib_publish("incoming.update", sendJsonBuffer);
   Serial.println(sendJsonBuffer);
   Serial.println("Sent Json on incoming.update");
   Serial.println("\n---------------------");

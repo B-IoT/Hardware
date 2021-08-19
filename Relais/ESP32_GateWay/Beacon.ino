@@ -12,13 +12,13 @@ void parsePayload(uint8_t* packetToParse, uint8_t bufferIndex) {
   }
 
   // Packet Kontakt detection ID: 6AFE02
-  else if (packetToParse[5] == 0x6A && packetToParse[6] == 0xFE && packetToParse[7] == 0x02) {
+  if (packetToParse[5] == 0x6A && packetToParse[6] == 0xFE && packetToParse[7] == 0x02) {
     buffer[bufferIndex].batteryLevel = packetToParse[11];
     buffer[bufferIndex].txPower = packetToParse[12]; //To convert correctly, in dbm [TO DO ]
   }
 
   //Packet Button ID: 6AFE03030D
-  else if (packetToParse[5] == 0x6A && packetToParse[6] == 0xFE && packetToParse[7] == 0x03 && packetToParse[8] == 0x03 && packetToParse[9] == 0x0D) {
+  if (packetToParse[5] == 0x6A && packetToParse[6] == 0xFE && packetToParse[7] == 0x03 && packetToParse[8] == 0x03 && packetToParse[9] == 0x0D) {
     buffer[bufferIndex].timeSinceLastClick = packetToParse[10];
   }
 }

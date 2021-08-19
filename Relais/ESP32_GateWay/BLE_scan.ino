@@ -111,7 +111,7 @@ void ScanBeacons() {
   for (int i = 0; i < nb_detected; i++) {
 
     Serial.print("Mac: ");
-    Serial.printf("%02x:%02x:%02x:%02x:%02x:%02x", buffer[i].address[0], buffer[i].address[1], buffer[i].address[2], buffer[i].address[3], buffer[i].address[4], buffer[i].address[5]);
+    Serial.printf("%02x:%02x:%02x:%02x:%02x:%02x\n", buffer[i].address[0], buffer[i].address[1], buffer[i].address[2], buffer[i].address[3], buffer[i].address[4], buffer[i].address[5]);
     Serial.print("RSSI: ");
     Serial.println(buffer[i].rssi);
     Serial.print("TX Power: ");

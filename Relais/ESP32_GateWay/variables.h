@@ -4,16 +4,22 @@
 #define MQTT_JSON_SIZE_RECEIVE 14*1024
 
 
+//BEGIN PARAMETERS to change when flashing for a company --------------------------------------------------------------
+
 //WiFI parameters
-const char* hardSSID = "Wifi-HJU";
-const char* hardPassword = "TX-3FqtA1_Cr$nTk";
+//const char* hardSSID = "Wifi-HJU";
+//const char* hardPassword = "TX-3FqtA1_Cr$nTk";
 
 
 //MQTT Parameters
 const char* mqttServerUri = "ws://mqtt.b-iot.ch:443/mqtt";
-const char* mqttUser = "test1";
-const char* mqttPassword = "test1";
-const char* relayID = "relay_1";
+const char* mqttUser = "testP1";
+const char* mqttPassword = "testP1";
+const char* company = "biot";
+const char* relayID = "relay_P1";
+
+//END PARAMETERS to change when flashing for a company ----------------------------------------------------------------
+
 
 //WhiteList related variables
 uint8_t whiteList[WHITELIST_LENGTH][MAC_ADDRESS_LENGTH]; // White list for the MAC

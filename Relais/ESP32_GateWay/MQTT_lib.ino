@@ -61,7 +61,7 @@ static void mqtt_init_client(const char* clientID, const char* mqttServerUriPara
   Serial.printf("MQTT client started\n");
 }
 
-static void mqtt_subscribe(const char * topic) {
+static void mqtt_lib_subscribe(const char * topic) {
   if (clientGlobal == NULL) {
     Serial.println("Please init client before subscribing.");
   } else {
@@ -69,7 +69,7 @@ static void mqtt_subscribe(const char * topic) {
   }
 
 }
-static void mqtt_publish(const char * topic, const char * data) {
+static void mqtt_lib_publish(const char * topic, const char * data) {
   if (clientGlobal == NULL) {
     Serial.println("Please init client before subscribing.");
   } else {
