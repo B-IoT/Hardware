@@ -29,7 +29,7 @@ class relay:
         self.whiteList = []
 
         self.scanner = BleakScanner()
-        self.beacons = []
+        self.beacons = {}
 
     # Parses the string whiteList passed and return a list of MAC formatted like aa:bb:cc:dd:ee:ff
     def _parse_whiteList(self, whiteListString):
@@ -55,7 +55,7 @@ class relay:
         # Example message:
         #{"relayID":"relay_P1","beacons":[{"mac":"fc:02:a0:fa:33:19","rssi":-82,"battery":42,"temperature":24,"status":3}],"latitude":46.51746,"longitude":6.562729,"floor":0} from client relay_P1
 
-        for b in self.beacons:
+        for addr, b in self.beacons:
             beaconDoc = b.copy()
             beaconDoc.pop("timeSinceLastMove")
             beaconDoc.pop("txPower")
@@ -74,7 +74,7 @@ class relay:
 
     def detection_callback_ble(self, device, advertisement_data):
         print(device.address, "RSSI:", device.rssi, advertisement_data)
-        if device.address in self.whiteList and not any(b["address"] == device.address for b in beacons):
+        if device.address in self.whiteList:
             beacon = {}
             beacon["mac"] = device.address
             beacon["rssi"] = device.rssi
@@ -85,19 +85,20 @@ class relay:
             beacon["timeSinceLastClick"] = 42 # TODO
             beacon["status"] = 0 # TODO
 
-            self.beacons.append(beacon)
+            self.beacons[beacon["mac"]] = beacon
 
     async def run_ble_scan_for_2_sec(self):
         self.scanner.register_detection_callback(self.detection_callback_ble)
         await self.scanner.start()
-        # await asyncio.sleep(1.0)
-        # await self.scanner.stop()
+        await asyncio.sleep(2.0)
+        await self.scanner.stop()
 
 
     async def loop(self):
+        self.scanner.register_detection_callback(self.detection_callback_ble)
         while True:
-            await self.run_ble_scan_for_2_sec()
             
+            await self.scanner.start()
             #time_response = ntpClient.request('europe.pool.ntp.org', version=3)
             #time_sec = time_response.tx_time
             time_sec = int(time.time())
@@ -107,6 +108,7 @@ class relay:
                 time_sec = int(time.time())
                 #time_response = ntpClient.request('europe.pool.ntp.org', version=3)
                 #time_sec = time_response.tx_time
+            await self.scanner.stop()
             self._send_beacons_on_mqtt()
 
             
