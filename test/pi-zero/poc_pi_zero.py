@@ -81,6 +81,8 @@ class relay:
         self.latitude = msgJson["latitude"]
         self.longitude = msgJson["longitude"]
 
+    # def _parse_ble_payload(self, payload):
+        
 
 
     def detection_callback_ble(self, device, advertisement_data):
@@ -89,6 +91,9 @@ class relay:
             beacon = {}
             beacon["mac"] = device.address
             beacon["rssi"] = device.rssi
+            
+            print(f"payload = {advertisement_data}")
+
             beacon["temperature"] = 22 # TODO
             beacon["battery"] = 42 # TODO
             beacon["timeSinceLastMove"] = 42 # TODO
