@@ -16,8 +16,8 @@ class relay:
         self.mqttUsername = "testP1"
         self.mqttPassword = "testP1"
 
-        self.latitude = 0.0
-        self.longitude = 0.0
+        self.latitude = 12.0
+        self.longitude = 12.0
         self.floor = 0
 
         self.MAC_ADDRESS_LENGTH_BYTES = 6
@@ -90,7 +90,7 @@ class relay:
     async def run_ble_scan_for_2_sec(self):
         self.scanner.register_detection_callback(self.detection_callback_ble)
         await self.scanner.start()
-        await asyncio.sleep(2.0)
+        await asyncio.sleep(1.0)
         await self.scanner.stop()
 
 
