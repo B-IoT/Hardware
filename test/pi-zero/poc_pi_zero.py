@@ -16,8 +16,8 @@ class relay:
         self.mqttUsername = "testP1"
         self.mqttPassword = "testP1"
 
-        self.latitude = 12.0
-        self.longitude = 12.0
+        self.latitude = 0.0
+        self.longitude = 0.0
         self.floor = 0
 
         self.MAC_ADDRESS_LENGTH_BYTES = 6
@@ -71,6 +71,17 @@ class relay:
             self.mqttClient.publish("incoming.update", payload = json.dumps(doc))
         
         beacons = []
+
+    def _update_parameters_from_backend(self, msgJson):
+        whiteListString = msgJson["whiteList"]
+
+        self.whiteList = self._parse_whiteList(whiteListString)
+        print(f"whiteList = {self.whiteList}")
+
+        self.latitude = msgJson["latitude"]
+        self.longitude = msgJson["longitude"]
+
+
 
     def detection_callback_ble(self, device, advertisement_data):
         print(device.address, "RSSI:", device.rssi, advertisement_data)
@@ -128,10 +139,7 @@ class relay:
         print("topic= " + msg.topic+", message = "+str(msg.payload))
         if(msg.topic == "update.parameters"):
             msgJson = json.loads(msg.payload.decode("utf-8"))
-            whiteListString = msgJson["whiteList"]
-
-            self.whiteList = self._parse_whiteList(whiteListString)
-            print(f"whiteList = {self.whiteList}")
+            self._update_parameters_from_backend(msgJson)
     
     def connect_mqtt(self):
         # Connect the client to mqtt:
