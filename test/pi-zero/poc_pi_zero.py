@@ -96,9 +96,8 @@ class relay:
 
     async def loop(self):
         self.scanner.register_detection_callback(self.detection_callback_ble)
+        await self.scanner.start()
         while True:
-            
-            await self.scanner.start()
             #time_response = ntpClient.request('europe.pool.ntp.org', version=3)
             #time_sec = time_response.tx_time
             time_sec = int(time.time())
@@ -108,7 +107,7 @@ class relay:
                 time_sec = int(time.time())
                 #time_response = ntpClient.request('europe.pool.ntp.org', version=3)
                 #time_sec = time_response.tx_time
-            await self.scanner.stop()
+            # await self.scanner.stop()
             self._send_beacons_on_mqtt()
 
             
