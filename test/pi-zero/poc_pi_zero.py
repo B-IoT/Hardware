@@ -90,7 +90,8 @@ class relay:
     async def run_ble_scan_for_2_sec(self):
         self.scanner.register_detection_callback(self.detection_callback_ble)
         await self.scanner.start()
-        await self.scanner.stop()
+        # await asyncio.sleep(1.0)
+        # await self.scanner.stop()
 
 
     async def loop(self):
