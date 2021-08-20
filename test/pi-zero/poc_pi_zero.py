@@ -87,17 +87,17 @@ class relay:
 
             self.beacons[beacon["mac"]] = beacon
 
-    async def run_ble_scan_for_2_sec(self):
+    async def run_ble_scan_for_0_5_sec(self):
         self.scanner.register_detection_callback(self.detection_callback_ble)
         await self.scanner.start()
-        await asyncio.sleep(2.0)
+        await asyncio.sleep(0.5)
         await self.scanner.stop()
 
 
     async def loop(self):
         self.scanner.register_detection_callback(self.detection_callback_ble)
-        await self.scanner.start()
         while True:
+            await run_ble_scan_for_0_5_sec()
             #time_response = ntpClient.request('europe.pool.ntp.org', version=3)
             #time_sec = time_response.tx_time
             time_sec = int(time.time())
