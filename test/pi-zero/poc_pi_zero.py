@@ -55,7 +55,7 @@ class relay:
         # Example message:
         #{"relayID":"relay_P1","beacons":[{"mac":"fc:02:a0:fa:33:19","rssi":-82,"battery":42,"temperature":24,"status":3}],"latitude":46.51746,"longitude":6.562729,"floor":0} from client relay_P1
 
-        for addr, b in self.beacons:
+        for addr, b in self.beacons.items():
             beaconDoc = b.copy()
             beaconDoc.pop("timeSinceLastMove")
             beaconDoc.pop("txPower")
