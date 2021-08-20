@@ -74,7 +74,7 @@ class relay:
 
     def detection_callback_ble(self, device, advertisement_data):
         print(device.address, "RSSI:", device.rssi, advertisement_data)
-        if device.address in self.whiteList:
+        if device.address in self.whiteList and not any(b["address"] == device.address for b in beacons):
             beacon = {}
             beacon["mac"] = device.address
             beacon["rssi"] = device.rssi
@@ -90,7 +90,6 @@ class relay:
     async def run_ble_scan_for_2_sec(self):
         self.scanner.register_detection_callback(self.detection_callback_ble)
         await self.scanner.start()
-        await asyncio.sleep(1.0)
         await self.scanner.stop()
 
 
