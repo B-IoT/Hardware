@@ -95,10 +95,7 @@ class relay:
             payload = []
             for k, v in advertisement_data.service_data.items():
                 payload = v
-            
-            print(f"payload = {payload}")
-            print(f"payload[5] = {payload[5]}")
-
+            print(f"payload utf-8 = {payload.decode('utf-8')}")
             beacon["temperature"] = 22 # TODO
             beacon["battery"] = 42 # TODO
             beacon["timeSinceLastMove"] = 42 # TODO
