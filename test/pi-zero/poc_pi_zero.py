@@ -92,7 +92,7 @@ class relay:
             beacon["mac"] = device.address
             beacon["rssi"] = device.rssi
             
-            print(f"payload = {advertisement_data.service_data}")
+            print(f"payload = {advertisement_data.service_data.items()[0][1]}")
 
             beacon["temperature"] = 22 # TODO
             beacon["battery"] = 42 # TODO
