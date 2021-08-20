@@ -48,7 +48,7 @@ class relay:
                     macAddr += ":"
             if not flag:
                 break
-            res.append(macAddr)
+            res.append(macAddr.upper())
         return res
 
     def _send_beacons_on_mqtt(self):
