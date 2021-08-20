@@ -97,7 +97,7 @@ class relay:
     async def loop(self):
         self.scanner.register_detection_callback(self.detection_callback_ble)
         while True:
-            await run_ble_scan_for_0_5_sec()
+            await self.run_ble_scan_for_0_5_sec()
             #time_response = ntpClient.request('europe.pool.ntp.org', version=3)
             #time_sec = time_response.tx_time
             time_sec = int(time.time())
