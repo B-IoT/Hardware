@@ -97,6 +97,7 @@ class relay:
                 payload = v
             
             print(f"payload = {payload}")
+            print(f"payload[5] = {payload[5]}")
 
             beacon["temperature"] = 22 # TODO
             beacon["battery"] = 42 # TODO
