@@ -145,7 +145,7 @@ class relay:
     
     async def loop(self):
         self.scanner.start()
-        self.scanner.clean()
+        self.scanner.clear()
         while True:
             self.scanner.process(timeout=1.5)
             #time_response = ntpClient.request('europe.pool.ntp.org', version=3)
