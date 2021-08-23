@@ -70,7 +70,7 @@ class relay:
 
             self.mqttClient.publish("incoming.update", payload = json.dumps(doc))
         
-        self.beacons = []
+        self.beacons = {}
 
     def _update_parameters_from_backend(self, msgJson):
         whiteListString = msgJson["whiteList"]
