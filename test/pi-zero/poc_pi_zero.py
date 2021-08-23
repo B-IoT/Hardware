@@ -11,6 +11,10 @@ from time import ctime
 class relay:
 
     TOPIC_PARAMETERS = "update.parameters"
+    TOPIC_UPDATE = "incoming.update"
+    MQTT_URL = "mqtt.b-iot.ch"
+    MQTT_PORT = 443
+
 
     def __init__(self):
         self.relayID = "relay_P1"
@@ -70,7 +74,7 @@ class relay:
             doc["longitude"] = self.longitude
             doc["floor"] = self.floor
 
-            self.mqttClient.publish("incoming.update", payload = json.dumps(doc))
+            self.mqttClient.publish(self.TOPIC_UPDATE, payload = json.dumps(doc))
         
         self.beacons = {}
 
@@ -90,14 +94,14 @@ class relay:
 
         # Subscribing in on_connect() means that if we lose the connection and
         # reconnect then subscriptions will be renewed.
-        client.subscribe(TOPIC_PARAMETERS, 1)
+        client.subscribe(self.TOPIC_PARAMETERS, 1)
 
     def on_disconnect(self, client, userdata, rc):
         client.reconnect()
     # The callback for when a PUBLISH message is received from the server.
     def on_message_mqtt(self, client, userdata, msg):
         print("topic= " + msg.topic+", message = "+str(msg.payload))
-        if(msg.topic == TOPIC_PARAMETERS):
+        if(msg.topic == self.TOPIC_PARAMETERS):
             msgJson = json.loads(msg.payload.decode("utf-8"))
             self._update_parameters_from_backend(msgJson)
     
@@ -111,7 +115,7 @@ class relay:
         self.mqttClient.on_connect = self.on_connect_mqtt
         self.mqttClient.on_message = self.on_message_mqtt
 
-        self.mqttClient.connect("mqtt.b-iot.ch", port=443, keepalive=60)
+        self.mqttClient.connect(self.MQTT_URL, port=self.MQTT_PORT, keepalive=60)
 
         self.mqttClient.loop_start()
 
