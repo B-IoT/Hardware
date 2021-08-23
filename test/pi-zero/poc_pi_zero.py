@@ -159,6 +159,9 @@ class relay:
                 #time_sec = time_response.tx_time
             # await self.scanner.stop()
             self._send_beacons_on_mqtt()
+            self.scanner.clear()
+        
+        self.scanner.stop()
 
             
     
