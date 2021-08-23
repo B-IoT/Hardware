@@ -147,6 +147,7 @@ class relay:
         self.scanner.start()
         self.scanner.clear()
         while True:
+            print("begin process")
             self.scanner.process(timeout=1.5)
             #time_response = ntpClient.request('europe.pool.ntp.org', version=3)
             #time_sec = time_response.tx_time
