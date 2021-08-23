@@ -17,10 +17,10 @@ class relay:
 
 
     def __init__(self):
-        self.relayID = "relay_P1"
+        self.relayID = "relay_raspberry"
         self.company = "biot"
-        self.mqttUsername = "testP1"
-        self.mqttPassword = "testP1"
+        self.mqttUsername = "testrasp"
+        self.mqttPassword = "testrasp"
 
         self.latitude = 0.0
         self.longitude = 0.0
