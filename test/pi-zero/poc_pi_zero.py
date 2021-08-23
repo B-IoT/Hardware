@@ -115,8 +115,16 @@ class relay:
         self.mqttClient.on_connect = self.on_connect_mqtt
         self.mqttClient.on_message = self.on_message_mqtt
 
-        self.mqttClient.connect(self.MQTT_URL, port=self.MQTT_PORT, keepalive=60)
-
+        flag_error = True
+        while flag_error:
+            try:
+                self.mqttClient.connect(self.MQTT_URL, port=self.MQTT_PORT, keepalive=60)
+                flag_error = False
+            except:
+                print("Cannot conect, probably due to lack of network. Wait and retry...")
+                flag_error = True
+                time.sleep(1)
+        
         self.mqttClient.loop_start()
 
     
