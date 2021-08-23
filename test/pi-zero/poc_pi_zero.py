@@ -5,7 +5,6 @@ import json
 from paho.mqtt.client import *
 from bluepy.btle import Scanner, DefaultDelegate
 
-import ntplib
 from time import ctime
 
 class relay:
@@ -28,8 +27,6 @@ class relay:
 
         self.MAC_ADDRESS_LENGTH_BYTES = 6
         self.certificate_ca_path = "./isrgrootx1.pem"
-
-        self.ntpClient = ntplib.NTPClient()
 
         self.mqttClient = None
         self.whiteList = []
@@ -132,12 +129,11 @@ class relay:
         while True:
             print("begin process")
             self.scanner.scan(timeout=2)
-            time_sec = int(self.ntpClient.request('europe.pool.ntp.org', version=3).tx_time)
-            # time_sec = int(time.time())
+            time_sec = int(time.time())
             print(time_sec)
             while time_sec % 3 != 0 :
                 time.sleep(0.01)
-                time_sec = int(self.ntpClient.request('europe.pool.ntp.org', version=3).tx_time)
+                time_sec = int(time.time())
             self._send_beacons_on_mqtt()
 
     
