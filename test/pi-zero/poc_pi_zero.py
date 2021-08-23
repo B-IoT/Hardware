@@ -10,6 +10,17 @@ from time import ctime
 
 class relay:
 
+    class ScanDelegate(DefaultDelegate):
+        def __init__(self, parent):
+            DefaultDelegate.__init__(self)
+            self.parent = parent
+
+        def handleDiscovery(self, dev, isNewDev, isNewData):
+            if isNewDev:
+                print("Discovered device", dev.addr)
+            elif isNewData:
+                print("Received new data from", dev.addr)
+
     def __init__(self):
         self.relayID = "relay_P1"
         self.company = "biot"
@@ -159,22 +170,16 @@ class relay:
                 #time_sec = time_response.tx_time
             # await self.scanner.stop()
             self._send_beacons_on_mqtt()
+
+            for dev in self.scanner.getDevices():
+                print(dev)
             self.scanner.clear()
         
         self.scanner.stop()
 
             
     
-    class ScanDelegate(DefaultDelegate):
-        def __init__(self, parent):
-            DefaultDelegate.__init__(self)
-            self.parent = parent
-
-        def handleDiscovery(self, dev, isNewDev, isNewData):
-            if isNewDev:
-                print("Discovered device", dev.addr)
-            elif isNewData:
-                print("Received new data from", dev.addr)
+    
 
 
     # Launch BLE loop
