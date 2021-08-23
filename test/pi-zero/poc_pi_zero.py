@@ -10,17 +10,6 @@ from time import ctime
 
 class relay:
 
-    class ScanDelegate(DefaultDelegate):
-        def __init__(self, parent):
-            DefaultDelegate.__init__(self)
-            self.parent = parent
-
-        def handleDiscovery(self, dev, isNewDev, isNewData):
-            if isNewDev:
-                print("Discovered device", dev.addr)
-            elif isNewData:
-                print("Received new data from", dev.addr)
-
     def __init__(self):
         self.relayID = "relay_P1"
         self.company = "biot"
@@ -39,7 +28,7 @@ class relay:
         self.mqttClient = None
         self.whiteList = []
 
-        self.scanner = Scanner().withDelegate(ScanDelegate(self))
+        self.scanner = Scanner().withDelegate(self.ScanDelegate(self))
         self.beacons = {}
 
     # Parses the string whiteList passed and return a list of MAC formatted like aa:bb:cc:dd:ee:ff
@@ -176,6 +165,18 @@ class relay:
             self.scanner.clear()
         
         self.scanner.stop()
+
+    
+    class ScanDelegate(DefaultDelegate):
+        def __init__(self, parent):
+            DefaultDelegate.__init__(self)
+            self.parent = parent
+
+        def handleDiscovery(self, dev, isNewDev, isNewData):
+            if isNewDev:
+                print("Discovered device", dev.addr)
+            elif isNewData:
+                print("Received new data from", dev.addr)
 
             
     
