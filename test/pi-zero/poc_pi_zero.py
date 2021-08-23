@@ -48,7 +48,7 @@ class relay:
                     macAddr += ":"
             if not flag:
                 break
-            res.append(macAddr.upper())
+            res.append(macAddr.lower())
         return res
 
     def _send_beacons_on_mqtt(self):
@@ -144,8 +144,6 @@ class relay:
 
     
     async def loop(self):
-        
-        self.scanner.clear()
         while True:
             self.scanner.start()
             print("begin process")
@@ -161,10 +159,6 @@ class relay:
                 #time_sec = time_response.tx_time
             # await self.scanner.stop()
             self._send_beacons_on_mqtt()
-
-            for dev in self.scanner.getDevices():
-                print(dev)
-            self.scanner.clear()
             self.scanner.stop()
         
         self.scanner.stop()
@@ -177,7 +171,24 @@ class relay:
 
         def handleDiscovery(self, dev, isNewDev, isNewData):
             if isNewDev:
-                print("Discovered device", dev.addr)
+                macAddr = dev.addr
+                print("Discovered device", macAddr)
+                print(macAddr, "RSSI:", dev.rssi, dev.getScanData())
+                if macAddr in self.whiteList:
+                    beacon = {}
+                    beacon["mac"] = macAddr
+                    beacon["rssi"] = dev.rssi
+                    
+                    payload = []
+                    # extract from dev.getScanData()
+                    beacon["temperature"] = 22 # TODO
+                    beacon["battery"] = 42 # TODO
+                    beacon["timeSinceLastMove"] = 42 # TODO
+                    beacon["txPower"] = 42 # TODO 
+                    beacon["timeSinceLastClick"] = 42 # TODO
+                    beacon["status"] = 0 # TODO
+
+                    self.parent.beacons[beacon["mac"]] = beacon
             elif isNewData:
                 print("Received new data from", dev.addr)
 
