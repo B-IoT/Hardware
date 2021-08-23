@@ -132,12 +132,12 @@ class relay:
         while True:
             print("begin process")
             self.scanner.scan(timeout=2)
-            time_sec = int(ntpClient.request('europe.pool.ntp.org', version=3).tx_time)
+            time_sec = int(self.ntpClient.request('europe.pool.ntp.org', version=3).tx_time)
             # time_sec = int(time.time())
             print(time_sec)
             while time_sec % 3 != 0 :
                 time.sleep(0.01)
-                time_sec = int(ntpClient.request('europe.pool.ntp.org', version=3).tx_time)
+                time_sec = int(self.ntpClient.request('europe.pool.ntp.org', version=3).tx_time)
             self._send_beacons_on_mqtt()
 
     
