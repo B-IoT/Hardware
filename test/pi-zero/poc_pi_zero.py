@@ -174,7 +174,7 @@ class relay:
                 macAddr = dev.addr
                 print("Discovered device", macAddr)
                 print(macAddr, "RSSI:", dev.rssi, dev.getScanData())
-                if macAddr in self.whiteList:
+                if macAddr in self.parent.whiteList:
                     beacon = {}
                     beacon["mac"] = macAddr
                     beacon["rssi"] = dev.rssi
