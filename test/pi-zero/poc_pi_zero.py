@@ -10,6 +10,8 @@ from time import ctime
 
 class relay:
 
+    TOPIC_PARAMETERS = "update.parameters"
+
     def __init__(self):
         self.relayID = "relay_P1"
         self.company = "biot"
@@ -80,36 +82,7 @@ class relay:
 
         self.latitude = msgJson["latitude"]
         self.longitude = msgJson["longitude"]
-
-    # def _parse_ble_payload(self, payload):
         
-
-
-    def detection_callback_ble(self, device, advertisement_data):
-        print(device.address, "RSSI:", device.rssi, advertisement_data)
-        if device.address in self.whiteList:
-            beacon = {}
-            beacon["mac"] = device.address
-            beacon["rssi"] = device.rssi
-            
-            payload = []
-            for k, v in advertisement_data.service_data.items():
-                payload = v
-            beacon["temperature"] = 22 # TODO
-            beacon["battery"] = 42 # TODO
-            beacon["timeSinceLastMove"] = 42 # TODO
-            beacon["txPower"] = 42 # TODO 
-            beacon["timeSinceLastClick"] = 42 # TODO
-            beacon["status"] = 0 # TODO
-
-            self.beacons[beacon["mac"]] = beacon
-
-    async def run_ble_scan_for_0_5_sec(self):
-        self.scanner.register_detection_callback(self.detection_callback_ble)
-        await self.scanner.start()
-        await asyncio.sleep(0.5)
-        await self.scanner.stop()
-
 
     # The callback for when the client receives a CONNACK response from the server.
     def on_connect_mqtt(self, client, userdata, flags, rc):
@@ -117,14 +90,14 @@ class relay:
 
         # Subscribing in on_connect() means that if we lose the connection and
         # reconnect then subscriptions will be renewed.
-        client.subscribe("update.parameters", 1)
+        client.subscribe(TOPIC_PARAMETERS, 1)
 
     def on_disconnect(self, client, userdata, rc):
         client.reconnect()
     # The callback for when a PUBLISH message is received from the server.
     def on_message_mqtt(self, client, userdata, msg):
         print("topic= " + msg.topic+", message = "+str(msg.payload))
-        if(msg.topic == "update.parameters"):
+        if(msg.topic == TOPIC_PARAMETERS):
             msgJson = json.loads(msg.payload.decode("utf-8"))
             self._update_parameters_from_backend(msgJson)
     
@@ -169,8 +142,8 @@ class relay:
             if isNewDev:
                 macAddr = dev.addr
                 print("Discovered device", macAddr)
-                print(macAddr, "RSSI:", dev.rssi, dev.getScanData())
                 if macAddr in self.parent.whiteList:
+                    print(macAddr, "RSSI:", dev.rssi, dev.getScanData())
                     beacon = {}
                     beacon["mac"] = macAddr
                     beacon["rssi"] = dev.rssi
