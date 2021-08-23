@@ -3,7 +3,7 @@ import asyncio
 import time
 import json
 from paho.mqtt.client import *
-from bleak import BleakScanner
+from bluepy.btle import Scanner, DefaultDelegate
 
 import ntplib
 from time import ctime
@@ -28,7 +28,7 @@ class relay:
         self.mqttClient = None
         self.whiteList = []
 
-        self.scanner = BleakScanner()
+        self.scanner = Scanner().withDelegate(ScanDelegate(self))
         self.beacons = {}
 
     # Parses the string whiteList passed and return a list of MAC formatted like aa:bb:cc:dd:ee:ff
@@ -111,25 +111,6 @@ class relay:
         await self.scanner.stop()
 
 
-    async def loop(self):
-        self.scanner.register_detection_callback(self.detection_callback_ble)
-        while True:
-            await self.run_ble_scan_for_0_5_sec()
-            #time_response = ntpClient.request('europe.pool.ntp.org', version=3)
-            #time_sec = time_response.tx_time
-            time_sec = int(time.time())
-            print(time_sec)
-            while time_sec % 3 != 0 :
-                time.sleep(0.01)
-                time_sec = int(time.time())
-                #time_response = ntpClient.request('europe.pool.ntp.org', version=3)
-                #time_sec = time_response.tx_time
-            # await self.scanner.stop()
-            self._send_beacons_on_mqtt()
-
-            
-
-
     # The callback for when the client receives a CONNACK response from the server.
     def on_connect_mqtt(self, client, userdata, flags, rc):
         print("Connected with result code "+str(rc))
@@ -160,6 +141,38 @@ class relay:
         self.mqttClient.connect("mqtt.b-iot.ch", port=443, keepalive=60)
 
         self.mqttClient.loop_start()
+
+    
+    async def loop(self):
+        self.scanner.start()
+        self.scanner.clean()
+        while True:
+            self.scanner.process(timeout=1.5)
+            #time_response = ntpClient.request('europe.pool.ntp.org', version=3)
+            #time_sec = time_response.tx_time
+            time_sec = int(time.time())
+            print(time_sec)
+            while time_sec % 3 != 0 :
+                time.sleep(0.01)
+                time_sec = int(time.time())
+                #time_response = ntpClient.request('europe.pool.ntp.org', version=3)
+                #time_sec = time_response.tx_time
+            # await self.scanner.stop()
+            self._send_beacons_on_mqtt()
+
+            
+    
+    class ScanDelegate(DefaultDelegate):
+        def __init__(self, parent):
+            DefaultDelegate.__init__(self)
+            self.parent = parent
+
+        def handleDiscovery(self, dev, isNewDev, isNewData):
+            if isNewDev:
+                print("Discovered device", dev.addr)
+            elif isNewData:
+                print("Received new data from", dev.addr)
+
 
     # Launch BLE loop
     # event_loop = asyncio.get_event_loop()
