@@ -70,7 +70,7 @@ class relay:
 
             self.mqttClient.publish("incoming.update", payload = json.dumps(doc))
         
-        beacons = []
+        self.beacons = []
 
     def _update_parameters_from_backend(self, msgJson):
         whiteListString = msgJson["whiteList"]
@@ -145,9 +145,8 @@ class relay:
     
     async def loop(self):
         while True:
-            self.scanner.start()
             print("begin process")
-            self.scanner.process(timeout=1.5)
+            self.scanner.scan(timeout=2)
             #time_response = ntpClient.request('europe.pool.ntp.org', version=3)
             #time_sec = time_response.tx_time
             time_sec = int(time.time())
@@ -159,9 +158,6 @@ class relay:
                 #time_sec = time_response.tx_time
             # await self.scanner.stop()
             self._send_beacons_on_mqtt()
-            self.scanner.stop()
-        
-        self.scanner.stop()
 
     
     class ScanDelegate(DefaultDelegate):
@@ -189,8 +185,8 @@ class relay:
                     beacon["status"] = 0 # TODO
 
                     self.parent.beacons[beacon["mac"]] = beacon
-            elif isNewData:
-                print("Received new data from", dev.addr)
+            # elif isNewData:
+            #     print("Received new data from", dev.addr)
 
             
     
