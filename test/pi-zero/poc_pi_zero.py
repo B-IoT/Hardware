@@ -186,10 +186,10 @@ class relay:
     # event_loop.close()
 
 
-async def main():
+async def main(csv = False):
     relay_instance = relay()
     relay_instance.connect_mqtt()
-    await relay_instance.loop()
+    await relay_instance.loop(csv)
 
 
 if __name__ == "__main__":
