@@ -1,1 +1,1 @@
-sudo python3 poc_pi_zero.py --csv
+sudo python3 poc_pi_zero.py --csv > pi_logs.txt
