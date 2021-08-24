@@ -193,7 +193,7 @@ async def main():
 
 
 if __name__ == "__main__":
-    if sys.argv.count > 1 and sys.argv[1] == "--csv":
+    if len(sys.argv) > 1 and sys.argv[1] == "--csv":
         # csv mode the get measurements 
         f = open(CSV_FILE_NAME, mode='w')
         f.close()
