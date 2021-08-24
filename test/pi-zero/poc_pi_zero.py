@@ -4,8 +4,11 @@ import time
 import json
 from paho.mqtt.client import *
 from bluepy.btle import Scanner, DefaultDelegate
+import sys
 
 from time import ctime
+
+CSV_FILE_NAME = "measurements.csv"
 
 class relay:
 
@@ -54,10 +57,12 @@ class relay:
             res.append(macAddr.lower())
         return res
 
-    def _send_beacons_on_mqtt(self):
+    def _send_beacons_on_mqtt(self, csv):
         # Example message:
         #{"relayID":"relay_P1","beacons":[{"mac":"fc:02:a0:fa:33:19","rssi":-82,"battery":42,"temperature":24,"status":3}],"latitude":46.51746,"longitude":6.562729,"floor":0} from client relay_P1
-
+        f = None
+        if csv:
+            f = open(CSV_FILE_NAME, mode='a')
         for addr, b in self.beacons.items():
             beaconDoc = b.copy()
             beaconDoc.pop("timeSinceLastMove")
@@ -71,9 +76,15 @@ class relay:
             doc["longitude"] = self.longitude
             doc["floor"] = self.floor
 
+            if csv:
+                f.write("address;" + beaconDoc["mac"] + "\nrssi;" + beaconDoc["rssi"])
+
             self.mqttClient.publish(self.TOPIC_UPDATE, payload = json.dumps(doc))
         
         self.beacons = {}
+        if f != None:
+            f.close()
+
 
     def _update_parameters_from_backend(self, msgJson):
         whiteListString = msgJson["whiteList"]
@@ -125,7 +136,7 @@ class relay:
         self.mqttClient.loop_start()
 
     
-    async def loop(self):
+    async def loop(self, csv = False):
         while True:
             print("begin process")
             self.scanner.scan(timeout=2)
@@ -134,7 +145,7 @@ class relay:
             while time_sec % 3 != 0 :
                 time.sleep(0.01)
                 time_sec = int(time.time())
-            self._send_beacons_on_mqtt()
+            self._send_beacons_on_mqtt(csv)
 
     
     class ScanDelegate(DefaultDelegate):
@@ -182,6 +193,14 @@ async def main():
 
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
-    loop.close()
+    if sys.argv.count > 1 and sys.argv[1] == "--csv":
+        # csv mode the get measurements 
+        f = open(CSV_FILE_NAME, mode='w')
+        f.close()
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(main(True))
+        loop.close()
+    else:
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(main())
+        loop.close()
