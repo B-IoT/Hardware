@@ -77,7 +77,7 @@ class relay:
             doc["floor"] = self.floor
 
             if csv:
-                f.write("address;" + beaconDoc["mac"] + "\nrssi;" + str(beaconDoc["rssi"]))
+                f.write("address;" + beaconDoc["mac"] + "\nrssi;" + str(beaconDoc["rssi"] + "\n"))
 
             self.mqttClient.publish(self.TOPIC_UPDATE, payload = json.dumps(doc))
         
